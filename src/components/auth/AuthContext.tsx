@@ -25,9 +25,9 @@ export const AuthProvider = ({ children }: any) => {
 
     useEffect(() => {
         try {
-            const userRaw = localStorage.getItem("user");
-            const permissionsRaw = localStorage.getItem("permissions");
-            const rolesRaw = localStorage.getItem("roles");
+            const userRaw = sessionStorage.getItem("user");
+            const permissionsRaw = sessionStorage.getItem("permissions");
+            const rolesRaw = sessionStorage.getItem("roles");
 
             if (userRaw && userRaw !== "undefined") {
                 setUser(JSON.parse(userRaw));
@@ -41,8 +41,7 @@ export const AuthProvider = ({ children }: any) => {
                 setRoles(JSON.parse(rolesRaw));
             }
         } catch (e) {
-            console.error("Invalid auth data in localStorage, clearing it", e);
-            localStorage.clear();
+            sessionStorage.clear();
         } finally {
             setAuthReady(true);
         }
@@ -54,13 +53,11 @@ export const AuthProvider = ({ children }: any) => {
         setPermissions(data.permissions);
         setRoles(data.roles);
 
-        console.log(data);
-        localStorage.setItem("user", JSON.stringify(data.userInfo));
-        localStorage.setItem("permissions", JSON.stringify(data.permissions));
-        localStorage.setItem("roles", JSON.stringify(data.roles));
-        localStorage.setItem("accessToken", data.accessToken);
-        localStorage.setItem("refreshToken", data.refreshToken);
-
+        sessionStorage.setItem("user", JSON.stringify(data.userInfo));
+        sessionStorage.setItem("permissions", JSON.stringify(data.permissions));
+        sessionStorage.setItem("roles", JSON.stringify(data.roles));
+        sessionStorage.setItem("accessToken", JSON.stringify(data.accessToken));
+        sessionStorage.setItem("refreshToken", JSON.stringify(data.refreshToken));
         notifyAuthUpdated(data);
     };
 
@@ -88,7 +85,7 @@ export const AuthProvider = ({ children }: any) => {
         setUser(null);
         setPermissions([]);
         setRoles([]);
-        localStorage.clear();
+        sessionStorage.clear();
     };
 
     const value: AuthContextType = {
