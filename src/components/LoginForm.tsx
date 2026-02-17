@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import type { FormEvent, ChangeEvent } from 'react';
-import { loginApi } from '../api/authApi';
+import { useState } from "react";
+import type { FormEvent, ChangeEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "./auth/AuthContext";
 
 interface FormData {
     email: string;
@@ -12,29 +13,32 @@ interface ValidationErrors {
     password?: string;
 }
 
-const LoginForm = () => {
+function LoginForm() {
+
     const [formData, setFormData] = useState<FormData>({
-        email: '',
-        password: '',
+        email: "",
+        password: "",
     });
 
     const [errors, setErrors] = useState<ValidationErrors>({});
     const [loading, setLoading] = useState<boolean>(false);
-    const [serverError, setServerError] = useState<string>('');
+    const [serverError, setServerError] = useState<string>("");
+    const { login } = useAuth();
+    const navigate = useNavigate();
 
     const validateForm = (): boolean => {
         const newErrors: ValidationErrors = {};
 
         if (!formData.email) {
-            newErrors.email = 'Email is required';
+            newErrors.email = "Email is required";
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            newErrors.email = 'Please enter a valid email address';
+            newErrors.email = "Please enter a valid email address";
         }
 
         if (!formData.password) {
-            newErrors.password = 'Password is required';
+            newErrors.password = "Password is required";
         } else if (formData.password.length < 6) {
-            newErrors.password = 'Password must be at least 6 characters';
+            newErrors.password = "Password must be at least 6 characters";
         }
 
         setErrors(newErrors);
@@ -44,58 +48,43 @@ const LoginForm = () => {
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
 
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             [name]: value,
         }));
 
         if (errors[name as keyof ValidationErrors]) {
-            setErrors(prev => ({
+            setErrors((prev) => ({
                 ...prev,
                 [name]: undefined,
             }));
         }
 
-        if (serverError) setServerError('');
+        if (serverError) setServerError("");
     };
 
-
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-
         if (!validateForm()) return;
 
         setLoading(true);
-        setServerError('');
-
         try {
-            const data = await loginApi(formData.email, formData.password);
-            console.log('Login response:', data);
-            // Save login data
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
-
-
-        } catch (error: any) {
-            if (error.response) {
-                // Backend responded with error (401, 400)
-                setServerError(
-                    error.response.data?.message || 'Invalid credentials'
-                );
+            await login(formData.email, formData.password);
+            navigate("/dashboard");
+        } catch (err: any) {
+            if (err instanceof Error) {
+                setServerError(err.message || "Login failed");
             } else {
-                // Network error
-                setServerError('Server not reachable');
+                setServerError("Something went wrong. Please try again.");
             }
         } finally {
             setLoading(false);
         }
     };
 
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center p-4">
             <div className="w-full max-w-md">
-
                 {/* Header with LOGO */}
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-orange-500 to-rose-500 rounded-2xl mb-4 shadow-lg">
@@ -123,7 +112,6 @@ const LoginForm = () => {
                 {/* Login Card */}
                 <div className="bg-white rounded-2xl shadow-xl p-8">
                     <form onSubmit={handleSubmit} className="space-y-6">
-
                         {serverError && (
                             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
                                 {serverError}
@@ -141,9 +129,8 @@ const LoginForm = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 disabled={loading}
-                                className={`w-full px-4 py-3 border ${
-                                    errors.email ? 'border-red-500' : 'border-gray-300'
-                                } rounded-lg`}
+                                className={`w-full px-4 py-3 border ${errors.email ? "border-red-500" : "border-gray-300"
+                                    } rounded-lg`}
                             />
                             {errors.email && (
                                 <p className="mt-1 text-sm text-red-600">{errors.email}</p>
@@ -161,9 +148,8 @@ const LoginForm = () => {
                                 value={formData.password}
                                 onChange={handleChange}
                                 disabled={loading}
-                                className={`w-full px-4 py-3 border ${
-                                    errors.password ? 'border-red-500' : 'border-gray-300'
-                                } rounded-lg`}
+                                className={`w-full px-4 py-3 border ${errors.password ? "border-red-500" : "border-gray-300"
+                                    } rounded-lg`}
                             />
                             {errors.password && (
                                 <p className="mt-1 text-sm text-red-600">{errors.password}</p>
@@ -176,9 +162,8 @@ const LoginForm = () => {
                             disabled={loading}
                             className="w-full bg-gradient-to-r from-orange-500 to-rose-500 text-white py-3 rounded-lg font-semibold disabled:opacity-50"
                         >
-                            {loading ? 'Signing in...' : 'Login'}
+                            {loading ? "Signing in..." : "Login"}
                         </button>
-
                     </form>
                 </div>
 
@@ -186,10 +171,9 @@ const LoginForm = () => {
                 <div className="mt-6 text-center text-sm text-gray-600">
                     © 2026 E-Tutoring System
                 </div>
-
             </div>
         </div>
     );
-};
+}
 
 export default LoginForm;
