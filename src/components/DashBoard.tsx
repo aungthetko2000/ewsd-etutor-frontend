@@ -1,13 +1,18 @@
-import PermissionGate from "./auth/PermissionGate";
-import StaffDashBoard from "./StaffDashboard";
-
 const Dashboard = () => {
   return (
     <>
       <div>
-        <PermissionGate permissions={["VIEW_STAFF_DASHBOARD"]}>
+        {/* <PermissionGate permissions={["VIEW_STAFF_DASHBOARD"]}>
           <StaffDashBoard />
         </PermissionGate>
+
+        <PermissionGate permissions={["VIEW_STUDENT_DASHBOARD"]}>
+          <StaffDashBoard />
+        </PermissionGate>
+
+        <PermissionGate permissions={["VIEW_TUTOR_DASHBOARD"]}>
+          <StaffDashBoard />
+        </PermissionGate> */}
       </div>
     </>
   );
