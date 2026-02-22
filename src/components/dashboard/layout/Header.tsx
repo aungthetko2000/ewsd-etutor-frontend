@@ -1,15 +1,30 @@
-const Header = () => {
+const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
     return (
-        <header className="h-20 bg-white/70 backdrop-blur-xl border-b border-slate-200/60 px-8 flex justify-between items-center sticky top-0 z-20">
-            <div className="flex flex-col gap-0.5">
-                <div className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-orange-500 animate-pulse"></span>
-                    <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Portal</h2>
+        <header className="h-20 bg-white/70 backdrop-blur-xl border-b border-slate-200/60 px-4 md:px-8 flex justify-between items-center sticky top-0 z-20">
+            <div className="flex items-center gap-4">
+                {/* --- MOBILE MENU TOGGLE --- */}
+                <button 
+                    onClick={onMenuClick}
+                    className="lg:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                    aria-label="Open Menu"
+                >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+
+                {/* Portal Titles */}
+                <div className="flex flex-col gap-0.5">
+                    <div className="flex items-center gap-2">
+                        <span className="h-1.5 w-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                        <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Portal</h2>
+                    </div>
+                    <span className="text-lg font-extrabold text-slate-800 tracking-tight">Tutor Dashboard</span>
                 </div>
-                <span className="text-lg font-extrabold text-slate-800 tracking-tight">Tutor Dashboard</span>
             </div>
 
             <div className="flex items-center gap-4">
+                {/* Notifications */}
                 <button className="cursor-pointer relative p-2 text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-colors">
                     <div className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></div>
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -17,6 +32,7 @@ const Header = () => {
                     </svg>
                 </button>
 
+                {/* User Profile */}
                 <div className="group flex items-center gap-3 pl-4 border-l border-slate-200 cursor-pointer">
                     <div className="flex flex-col items-end hidden sm:flex">
                         <p className="text-sm font-bold text-slate-700 group-hover:text-orange-600 transition-colors">Admin Tutor</p>
@@ -32,7 +48,7 @@ const Header = () => {
                 </div>
             </div>
         </header>
-    )
-}
+    );
+};
 
 export default Header;

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Header from "./Header";
 import SideBar from "./SideBar";
 
@@ -14,19 +15,36 @@ const DashboardLayout = ({
     onTabChange,
     children,
 }: DashboardLayoutProps) => {
+
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
     return (
-        <div className="flex h-screen bg-[#F8FAFC]">
+        <div className="relative flex h-screen w-full bg-[#F8FAFC] overflow-hidden">
+            {/* Sidebar with mobile classes */}
             <SideBar
                 menu={menu}
                 activeTab={activeTab}
-                onTabChange={onTabChange}
+                onTabChange={(key) => {
+                    onTabChange(key);
+                    setIsSidebarOpen(false); // Close sidebar after clicking a link on mobile
+                }}
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
             />
-            <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Header */}
-                <Header />
 
-                {/* Content */}
-                <main className="flex-1 p-10 overflow-y-auto">
+            {/* Overlay for mobile to click-to-close */}
+            {isSidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-slate-900/50 z-20 lg:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+                {/* Pass the toggle function to Header */}
+                <Header onMenuClick={() => setIsSidebarOpen(true)} />
+
+                <main className="flex-1 p-4 md:p-10 overflow-y-auto">
                     {children}
                 </main>
             </div>
