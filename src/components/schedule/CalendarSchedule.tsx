@@ -17,29 +17,29 @@ interface EventMap {
 // ─── Sample seed data ─────────────────────────────────────────────────────────
 const SEED_EVENTS: EventMap = {
   "2026-1-3": [
-    { id: "1", title: "Math Tutoring",  time: "10:00", duration: "60 Minutes", notes: "Algebra chapter 3", color: "indigo" },
+    { id: "1", title: "Math Tutoring", time: "10:00", duration: "60 Minutes", notes: "Algebra chapter 3", color: "indigo" },
     { id: "2", title: "Physics Review", time: "14:00", duration: "30 Minutes", notes: "", color: "sky" },
   ],
-  "2026-1-7":  [{ id: "3", title: "English Essay",    time: "18:00", duration: "60 Minutes",  notes: "Essay outline review", color: "violet"  }],
-  "2026-1-12": [{ id: "4", title: "Chemistry Lab",    time: "14:00", duration: "90 Minutes",  notes: "", color: "emerald" }],
+  "2026-1-7": [{ id: "3", title: "English Essay", time: "18:00", duration: "60 Minutes", notes: "Essay outline review", color: "violet" }],
+  "2026-1-12": [{ id: "4", title: "Chemistry Lab", time: "14:00", duration: "90 Minutes", notes: "", color: "emerald" }],
   "2026-1-22": [
-    { id: "5", title: "Biology Session",    time: "15:00", duration: "60 Minutes", notes: "Cell division topic", color: "indigo" },
+    { id: "5", title: "Biology Session", time: "15:00", duration: "60 Minutes", notes: "Cell division topic", color: "indigo" },
     { id: "6", title: "History Exam Prep", time: "19:00", duration: "45 Minutes", notes: "", color: "rose" },
   ],
   "2026-2-28": [{ id: "7", title: "Final Mock Test", time: "21:00", duration: "120 Minutes", notes: "Full syllabus", color: "violet" }],
 };
 
 const COLOR_CLASSES: Record<string, { pill: string; dot: string; ring: string; badge: string; light: string }> = {
-  indigo:  { pill: "bg-indigo-100 text-indigo-700",  dot: "bg-indigo-500",  ring: "ring-indigo-400",  badge: "bg-indigo-500",  light: "bg-indigo-50"  },
-  violet:  { pill: "bg-violet-100 text-violet-700",  dot: "bg-violet-500",  ring: "ring-violet-400",  badge: "bg-violet-500",  light: "bg-violet-50"  },
-  sky:     { pill: "bg-sky-100 text-sky-700",         dot: "bg-sky-500",     ring: "ring-sky-400",     badge: "bg-sky-500",     light: "bg-sky-50"     },
+  indigo: { pill: "bg-indigo-100 text-indigo-700", dot: "bg-indigo-500", ring: "ring-indigo-400", badge: "bg-indigo-500", light: "bg-indigo-50" },
+  violet: { pill: "bg-violet-100 text-violet-700", dot: "bg-violet-500", ring: "ring-violet-400", badge: "bg-violet-500", light: "bg-violet-50" },
+  sky: { pill: "bg-sky-100 text-sky-700", dot: "bg-sky-500", ring: "ring-sky-400", badge: "bg-sky-500", light: "bg-sky-50" },
   emerald: { pill: "bg-emerald-100 text-emerald-700", dot: "bg-emerald-500", ring: "ring-emerald-400", badge: "bg-emerald-500", light: "bg-emerald-50" },
-  rose:    { pill: "bg-rose-100 text-rose-700",       dot: "bg-rose-500",    ring: "ring-rose-400",    badge: "bg-rose-500",    light: "bg-rose-50"    },
+  rose: { pill: "bg-rose-100 text-rose-700", dot: "bg-rose-500", ring: "ring-rose-400", badge: "bg-rose-500", light: "bg-rose-50" },
 };
 
-const DURATIONS = ["15 Minutes","30 Minutes","45 Minutes","60 Minutes","90 Minutes","120 Minutes"];
-const WEEKDAYS  = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-const MONTHS    = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DURATIONS = ["15 Minutes", "30 Minutes", "45 Minutes", "60 Minutes", "90 Minutes", "120 Minutes"];
+const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function getDaysInMonth(year: number, month: number) {
@@ -240,12 +240,12 @@ interface AddModalProps {
 }
 
 function AddEventModal({ date, onClose, onSave }: AddModalProps) {
-  const [title,    setTitle]    = useState("");
-  const [dateVal,  setDateVal]  = useState("");
-  const [time,     setTime]     = useState("");
+  const [title, setTitle] = useState("");
+  const [dateVal, setDateVal] = useState("");
+  const [time, setTime] = useState("");
   const [duration, setDuration] = useState("60 Minutes");
-  const [notes,    setNotes]    = useState("");
-  const [color,    setColor]    = useState<CalendarEvent["color"]>("indigo");
+  const [notes, setNotes] = useState("");
+  const [color, setColor] = useState<CalendarEvent["color"]>("indigo");
 
   if (!date) return null;
 
@@ -266,7 +266,7 @@ function AddEventModal({ date, onClose, onSave }: AddModalProps) {
     onClose();
   };
 
-  const defaultDate = `${date.year}-${String(date.month + 1).padStart(2,"0")}-${String(date.day).padStart(2,"0")}`;
+  const defaultDate = `${date.year}-${String(date.month + 1).padStart(2, "0")}-${String(date.day).padStart(2, "0")}`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
@@ -303,17 +303,34 @@ function AddEventModal({ date, onClose, onSave }: AddModalProps) {
 
         <div className="mb-4">
           <label className="mb-1.5 block text-sm font-medium text-gray-600">Duration (minutes)</label>
-          <select
-            className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-800 outline-none focus:border-orange-400 focus:bg-white focus:ring-2 focus:ring-orange-100 transition"
-            value={duration} onChange={(e) => setDuration(e.target.value)}>
-            {DURATIONS.map(d => <option key={d}>{d}</option>)}
-          </select>
+          <div className="relative group">
+            <select
+              className="w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-800 outline-none focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100/50 transition-all cursor-pointer"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+            >
+              {DURATIONS.map(d => <option key={d}>{d}</option>)}
+            </select>
+
+            {/* Custom Modern Arrow */}
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 group-focus-within:text-orange-500 transition-colors">
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                strokeWidth="2.5"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </div>
+          </div>
         </div>
 
         <div className="mb-4">
           <label className="mb-2 block text-sm font-medium text-gray-600">Session Color</label>
           <div className="flex gap-2.5">
-            {(["indigo","violet","sky","emerald","rose"] as const).map(c => (
+            {(["indigo", "violet", "sky", "emerald", "rose"] as const).map(c => (
               <button key={c} onClick={() => setColor(c)}
                 className={`h-7 w-7 rounded-full ${COLOR_CLASSES[c].dot} transition-transform
                   ${color === c ? `ring-2 ring-offset-2 ${COLOR_CLASSES[c].ring} scale-110` : "hover:scale-105"}`} />
@@ -342,9 +359,9 @@ function AddEventModal({ date, onClose, onSave }: AddModalProps) {
 export default function CalendarSchedule() {
   const today = new Date();
 
-  const [currentYear,  setCurrentYear]  = useState(today.getFullYear());
+  const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
-  const [events,       setEvents]       = useState<EventMap>(SEED_EVENTS);
+  const [events, setEvents] = useState<EventMap>(SEED_EVENTS);
 
   // Add session modal
   const [addModalDate, setAddModalDate] = useState<{ year: number; month: number; day: number } | null>(null);
@@ -356,10 +373,10 @@ export default function CalendarSchedule() {
     isPast: boolean;
   } | null>(null);
 
-  const daysInMonth   = getDaysInMonth(currentYear, currentMonth);
-  const offset        = firstDayOffset(currentYear, currentMonth);
+  const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+  const offset = firstDayOffset(currentYear, currentMonth);
   const prevMonthDays = getDaysInMonth(currentYear, currentMonth === 0 ? 11 : currentMonth - 1);
-  const totalCells    = Math.ceil((offset + daysInMonth) / 7) * 7;
+  const totalCells = Math.ceil((offset + daysInMonth) / 7) * 7;
 
   const goPrev = () => {
     if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(y => y - 1); }
@@ -407,7 +424,7 @@ export default function CalendarSchedule() {
         </div>
         <button
           onClick={() => setAddModalDate({ year: currentYear, month: currentMonth, day: today.getDate() })}
-          className="rounded-xl bg-gradient-to-br from-orange-500 to-rose-500 px-5 py-2 text-sm font-semibold text-white shadow hover:opacity-90 active:scale-95 transition-all"
+          className="cursor-pointer rounded-xl bg-gradient-to-br from-orange-500 to-rose-500 px-5 py-2 text-sm font-semibold text-white shadow hover:opacity-90 active:scale-95 transition-all"
         >
           + Add Session
         </button>
@@ -429,10 +446,10 @@ export default function CalendarSchedule() {
               ? dayNum
               : dayNum < 1 ? prevMonthDays + dayNum : dayNum - daysInMonth;
 
-            const key        = makeDateKey(currentYear, currentMonth, dayNum);
+            const key = makeDateKey(currentYear, currentMonth, dayNum);
             const cellEvents = isCurrentMonth ? (events[key] ?? []) : [];
-            const todayCell  = isCurrentMonth && isToday(dayNum);
-            const isPast     = isCurrentMonth && new Date(currentYear, currentMonth, dayNum) < todayStart;
+            const todayCell = isCurrentMonth && isToday(dayNum);
+            const isPast = isCurrentMonth && new Date(currentYear, currentMonth, dayNum) < todayStart;
 
             return (
               <div
@@ -445,16 +462,16 @@ export default function CalendarSchedule() {
                   "min-h-[100px] border-b border-r border-gray-100 p-2 transition-colors",
                   i % 7 === 6 ? "border-r-0" : "",
                   !isCurrentMonth ? "bg-gray-50/70" :
-                  isPast          ? "cursor-not-allowed bg-gray-50/50" :
-                                    "cursor-pointer hover:bg-orange-50/40",
+                    isPast ? "cursor-not-allowed bg-gray-50/50" :
+                      "cursor-pointer hover:bg-orange-50/40",
                 ].join(" ")}
               >
                 <div className="mb-1.5 flex">
                   <span className={[
                     "flex h-7 w-7 items-center justify-center rounded-full text-sm font-semibold",
-                    todayCell        ? "bg-gradient-to-br from-orange-500 to-rose-500 text-white shadow" :
-                    isPast           ? "text-gray-300" :
-                    isCurrentMonth   ? "text-gray-700" : "text-gray-300",
+                    todayCell ? "bg-gradient-to-br from-orange-500 to-rose-500 text-white shadow" :
+                      isPast ? "text-gray-300" :
+                        isCurrentMonth ? "text-gray-700" : "text-gray-300",
                   ].join(" ")}>
                     {displayDay}
                   </span>
