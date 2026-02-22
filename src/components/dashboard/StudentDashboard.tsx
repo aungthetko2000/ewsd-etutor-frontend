@@ -1,4 +1,5 @@
 import { useState } from "react";
+import CalendarSchedule from "../schedule/CalendarSchedule";
 
 const IconDashboard = ({ className }: any) => (
     <svg
@@ -163,7 +164,7 @@ const StudentDashboard = () => {
                 {/* Main */}
                 <main className="flex-1 p-8 overflow-y-auto">
                     <h1 className="text-2xl font-bold capitalize mb-6 text-slate-800">
-                        {activeTab}
+                          {activeTab === "schedule" && <CalendarSchedule />}
                     </h1>
 
                     {/* Students */}
