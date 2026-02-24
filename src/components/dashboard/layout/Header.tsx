@@ -1,4 +1,21 @@
-const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
+import { useEffect } from "react";
+import { useStore } from "../../store/useStore";
+import { observer } from "mobx-react-lite";
+
+const Header = observer(({ onMenuClick }: { onMenuClick: () => void }) => {
+
+    const { userStore } = useStore();
+
+    useEffect(() => {
+        const userInfo = sessionStorage.getItem('user');
+        if (userInfo) {
+            const user = JSON.parse(userInfo);
+            userStore.state.setFirstName(user.firstName)
+            userStore.state.setLastName(user.lastName)
+            userStore.state.setEmail(user.email)
+        }
+    })
+
     return (
         <header className="h-20 bg-white/70 backdrop-blur-xl border-b border-slate-200/60 px-4 md:px-8 flex justify-between items-center sticky top-0 z-20">
             <div className="flex items-center gap-4">
@@ -35,13 +52,13 @@ const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
                 {/* User Profile */}
                 <div className="group flex items-center gap-3 pl-4 border-l border-slate-200 cursor-pointer">
                     <div className="flex flex-col items-end hidden sm:flex">
-                        <p className="text-sm font-bold text-slate-700 group-hover:text-orange-600 transition-colors">Admin Tutor</p>
-                        <p className="text-[11px] font-medium text-slate-400">tutor@qeducato.com</p>
+                        <p className="text-sm font-bold text-slate-700 group-hover:text-orange-600 transition-colors">{userStore.state.firstName} {userStore.state.lastName}</p>
+                        <p className="text-[11px] font-medium text-slate-400">{userStore.state.email}</p>
                     </div>
 
                     <div className="relative">
                         <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-slate-100 to-slate-200 border-2 border-white shadow-sm flex items-center justify-center font-bold text-slate-700 transition-transform group-hover:scale-105">
-                            AD
+                            {userStore.state.firstName.charAt(0)}{userStore.state.lastName.charAt(0)}
                         </div>
                         <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white"></div>
                     </div>
@@ -49,6 +66,6 @@ const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
             </div>
         </header>
     );
-};
+});
 
 export default Header;
