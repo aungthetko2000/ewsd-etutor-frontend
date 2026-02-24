@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 
 const Dashboard = () => {
-  
+  // --- LocalStorage Logic ---
   const getInitialData = (key: string, defaultValue: any) => {
     const saved = localStorage.getItem(key);
     return saved ? JSON.parse(saved) : defaultValue;
@@ -17,7 +17,7 @@ const Dashboard = () => {
   const [selectedTutorId, setSelectedTutorId] = useState<any>(null);
   const [selectedStudents, setSelectedStudents] = useState<any[]>([]);
 
-  
+  // Sync with LocalStorage
   useEffect(() => {
     localStorage.setItem('students', JSON.stringify(students));
     localStorage.setItem('tutors', JSON.stringify(tutors));
@@ -37,6 +37,19 @@ const Dashboard = () => {
     setIsModalOpen(false);
   };
 
+  // Pair ဖျက်လိုက်ရင် Student Status ပါ ပြန်ပြင်ပေးမယ့် logic
+  const removePair = (pairId: number, studentId: number) => {
+    // 1. Table ထဲကနေ pair ကို ဖျက်တယ်
+    setAllocatedPairs(allocatedPairs.filter(p => p.id !== pairId));
+
+    // 2. Student List ထဲမှာ status ကို 'Unassigned' လို့ ပြန်ပြင်တယ်
+    setStudents(prevStudents => 
+      prevStudents.map(s => 
+        s.id === studentId ? { ...s, status: 'Unassigned' } : s
+      )
+    );
+  };
+
   const deleteStudent = (id: number) => {
     setStudents(students.filter(s => s.id !== id));
     setSelectedStudents(selectedStudents.filter(s => s.id !== id));
@@ -49,7 +62,7 @@ const Dashboard = () => {
     setAllocatedPairs(allocatedPairs.filter(p => p.tutorId !== id));
   };
 
-  const toggleStudent = (s: any) => {
+  const toggleStudentSelection = (s: any) => {
     if (selectedStudents.find((item: any) => item.id === s.id)) {
       setSelectedStudents(selectedStudents.filter((item: any) => item.id !== s.id));
     } else {
@@ -72,6 +85,7 @@ const Dashboard = () => {
 
     setAllocatedPairs([...allocatedPairs, ...newEntries]);
 
+    // Update students status
     const assignedIds = selectedStudents.map(s => s.id);
     setStudents(students.map(s => 
       assignedIds.includes(s.id) ? { ...s, status: `Assigned to ${tutor.name}` } : s
@@ -85,23 +99,25 @@ const Dashboard = () => {
     <div className="flex h-screen bg-[#f8f9fa] text-slate-800 font-sans overflow-hidden">
       {/* Sidebar */}
       <aside className="w-64 bg-[#0f172a] text-white flex flex-col shrink-0">
-        <div className="p-6 flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center font-bold">N</div>
-          <span className="text-xl font-bold tracking-tight">NexusTutoring</span>
-        </div>
-        <nav className="flex-1 px-4 space-y-2 mt-4">
-          <div className="flex items-center gap-3 p-3 bg-blue-600/10 text-blue-400 rounded-lg text-sm font-medium cursor-pointer italic">Allocation System</div>
+        <div className="p-6 font-bold text-xl tracking-tight">NexusTutoring</div>
+        <nav className="flex-1 px-4 mt-6 space-y-2">
+          <div className="p-3 bg-blue-600/10 text-blue-400 rounded-lg text-sm font-medium">Allocation System</div>
         </nav>
-        <div className="p-6 text-red-400 text-sm cursor-pointer border-t border-slate-700" onClick={() => {localStorage.clear(); window.location.reload();}}>🧹 Reset Data</div>
+        <div 
+          className="p-6 text-red-400 text-sm cursor-pointer border-t border-slate-700" 
+          onClick={() => { localStorage.clear(); window.location.reload(); }}
+        >
+          🧹 Reset All Data
+        </div>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="h-16 bg-white border-b flex items-center justify-between px-8 shrink-0 shadow-sm">
-          <div className="text-gray-400 text-xs font-bold tracking-widest uppercase">Staff Control Panel</div>
+        <header className="h-16 bg-white border-b flex items-center justify-between px-8 shrink-0 shadow-sm text-sm font-bold uppercase tracking-widest text-slate-400">
+          Staff Control Panel
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="bg-blue-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-md text-sm"
+            className="bg-blue-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-blue-700 transition"
           >
             + Add New User
           </button>
@@ -110,7 +126,6 @@ const Dashboard = () => {
         <div className="p-8 flex-1 overflow-y-auto space-y-8">
           <h1 className="text-2xl font-bold text-[#1e293b]">Tutor Allocation System</h1>
 
-          {/* Allocation Selector Section */}
           <div className="grid grid-cols-12 gap-6 h-[400px]">
             {/* Student Selection */}
             <div className="col-span-4 bg-white rounded-xl border border-gray-200 p-5 shadow-sm flex flex-col overflow-hidden">
@@ -118,7 +133,7 @@ const Dashboard = () => {
               <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
                 {students.map(s => (
                   <div key={s.id} className="group flex items-center gap-3 p-3 rounded-lg border border-slate-50 hover:border-blue-200 hover:bg-blue-50/20 transition">
-                    <input type="checkbox" checked={selectedStudents.some(item => item.id === s.id)} onChange={() => toggleStudent(s)} className="w-4 h-4 cursor-pointer" />
+                    <input type="checkbox" checked={selectedStudents.some(item => item.id === s.id)} onChange={() => toggleStudentSelection(s)} className="w-4 h-4" />
                     <div className="flex-1 min-w-0 text-sm italic">{s.name} <span className="text-[10px] text-gray-400">({s.status})</span></div>
                     <button onClick={() => deleteStudent(s.id)} className="opacity-0 group-hover:opacity-100 text-red-400">🗑</button>
                   </div>
@@ -132,8 +147,8 @@ const Dashboard = () => {
               <div className="flex-1 overflow-y-auto space-y-2 pr-1">
                 {tutors.map(t => (
                   <label key={t.id} className={`group flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition ${selectedTutorId === t.id ? 'bg-blue-50 border-blue-400' : 'border-slate-50 hover:bg-slate-50'}`}>
-                    <input type="radio" name="tutor" checked={selectedTutorId === t.id} onChange={() => setSelectedTutorId(t.id)} className="w-4 h-4" />
-                    <div className="flex-1 text-sm font-medium">{t.name} <span className="text-[10px] text-blue-500 block italic">{t.sub}</span></div>
+                    <input type="radio" name="tutor" checked={selectedTutorId === t.id} onChange={() => setSelectedTutorId(t.id)} />
+                    <div className="flex-1 text-sm font-medium ml-2">{t.name} <span className="text-[10px] text-blue-500 block italic">{t.sub}</span></div>
                     <button onClick={(e) => { e.stopPropagation(); deleteTutor(t.id); }} className="opacity-0 group-hover:opacity-100 text-red-400">🗑</button>
                   </label>
                 ))}
@@ -141,75 +156,77 @@ const Dashboard = () => {
             </div>
 
             {/* Preview Section */}
-            <div className="col-span-4 bg-white rounded-xl border border-gray-200 p-6 shadow-sm flex flex-col">
-              <h3 className="font-bold mb-4 text-sm underline decoration-blue-500 underline-offset-4">Preview</h3>
-              <div className="flex-1 space-y-4 overflow-hidden flex flex-col text-xs">
+            <div className="col-span-4 bg-white rounded-xl border border-gray-200 p-6 shadow-sm flex flex-col text-sm">
+              <h3 className="font-bold mb-4 underline decoration-blue-500 underline-offset-4">Preview</h3>
+              <div className="flex-1 space-y-4 overflow-hidden flex flex-col italic">
                 <div className="p-3 bg-slate-50 rounded-lg border">
-                  <p className="font-bold text-slate-400 uppercase mb-1">Tutor</p>
-                  <p className="font-bold text-slate-700">{tutors.find(t => t.id === selectedTutorId)?.name || '---'}</p>
+                  <p className="font-bold text-slate-400 uppercase text-[10px] mb-1">Tutor</p>
+                  <p>{tutors.find(t => t.id === selectedTutorId)?.name || '---'}</p>
                 </div>
                 <div className="p-3 bg-slate-50 rounded-lg border flex-1 overflow-y-auto">
-                  <p className="font-bold text-slate-400 uppercase mb-2">Students ({selectedStudents.length})</p>
-                  {selectedStudents.map(s => <div key={s.id} className="py-1 border-b italic">{s.name}</div>)}
+                  <p className="font-bold text-slate-400 uppercase text-[10px] mb-2">Students ({selectedStudents.length})</p>
+                  {selectedStudents.map(s => <div key={s.id} className="py-1 border-b border-white">{s.name}</div>)}
                 </div>
               </div>
               <button 
                 onClick={handleConfirmAllocation}
                 disabled={!selectedTutorId || selectedStudents.length === 0}
-                className="w-full mt-6 bg-[#0f172a] text-white py-3 rounded-lg font-bold disabled:bg-gray-200 shadow-lg active:scale-95 transition"
+                className="w-full mt-6 bg-[#0f172a] text-white py-3 rounded-lg font-bold disabled:bg-gray-200 shadow-lg"
               >
                 Confirm Allocation
               </button>
             </div>
           </div>
 
-          {/* Table */}
+          {/* Allocated Table */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-12">
-            <div className="p-6 border-b bg-slate-50/50 flex justify-between">
-               <h3 className="font-bold text-lg">Allocated Tutor-Student Pairs</h3>
+            <div className="p-6 border-b bg-slate-50/50">
+               <h3 className="font-bold text-lg text-slate-800">Allocated Tutor-Student Pairs</h3>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-left">
+              <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 text-[10px] uppercase font-bold text-slate-400 border-b">
                   <tr>
-                    <th className="px-6 py-4">Student Name</th>
-                    <th className="px-6 py-4">Tutor Name</th>
-                    <th className="px-6 py-4">Date</th>
-                    <th className="px-6 py-4 text-center">Manage</th>
+                    <th className="px-6 py-4 text-slate-500">Student Name</th>
+                    <th className="px-6 py-4 text-slate-500">Tutor Name</th>
+                    <th className="px-6 py-4 text-slate-500">Date</th>
+                    <th className="px-6 py-4 text-center text-slate-500">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {allocatedPairs.map(pair => (
-                    <tr key={pair.id} className="hover:bg-blue-50/30 transition text-sm">
+                    <tr key={pair.id} className="hover:bg-blue-50/20 transition">
                       <td className="px-6 py-4 font-bold italic">{pair.studentName}</td>
                       <td className="px-6 py-4 text-slate-600">{pair.tutorName}</td>
                       <td className="px-6 py-4 text-xs text-slate-400">{pair.date}</td>
                       <td className="px-6 py-4 text-center">
                         <button 
-                          onClick={() => setAllocatedPairs(allocatedPairs.filter(p => p.id !== pair.id))}
-                          className="text-red-500 font-bold bg-red-50 px-3 py-1 rounded text-[10px]"
+                          onClick={() => removePair(pair.id, pair.studentId)}
+                          className="bg-red-50 text-red-500 px-3 py-1 rounded text-[10px] font-bold hover:bg-red-100"
                         >
-                          Delete
+                          Remove
                         </button>
                       </td>
                     </tr>
                   ))}
+                  {allocatedPairs.length === 0 && (
+                    <tr><td colSpan={4} className="p-16 text-center text-gray-300 italic">No allocations yet.</td></tr>
+                  )}
                 </tbody>
               </table>
-              {allocatedPairs.length === 0 && <p className="p-10 text-center text-gray-400 italic">No allocations yet.</p>}
             </div>
           </div>
         </div>
       </main>
 
-      {/* Modal */}
+      {/* Add User Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xs p-6 border animate-in zoom-in duration-150">
             <h3 className="text-lg font-bold mb-6 text-slate-800">Add New User</h3>
             <div className="space-y-4">
-              <input className="w-full border-b py-2 text-sm outline-none focus:border-blue-500" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Full Name" />
-              <select className="w-full border-b py-2 text-sm outline-none" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}>
+              <input className="w-full border-b py-2 text-sm outline-none focus:border-blue-500 transition" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Full Name" />
+              <select className="w-full border-b py-2 text-sm outline-none bg-transparent" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}>
                 <option value="Student">Student</option>
                 <option value="Tutor">Tutor</option>
               </select>
