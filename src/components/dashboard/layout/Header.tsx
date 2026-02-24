@@ -1,9 +1,18 @@
+import { useNavigate } from "react-router-dom";
+
 const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
+
+    const navigate = useNavigate();
+
+    const handleBlogList = () => {
+        navigate('/blog-list');
+    }
+    
     return (
         <header className="h-20 bg-white/70 backdrop-blur-xl border-b border-slate-200/60 px-4 md:px-8 flex justify-between items-center sticky top-0 z-20">
             <div className="flex items-center gap-4">
                 {/* --- MOBILE MENU TOGGLE --- */}
-                <button 
+                <button
                     onClick={onMenuClick}
                     className="lg:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
                     aria-label="Open Menu"
@@ -24,6 +33,15 @@ const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
             </div>
 
             <div className="flex items-center gap-4">
+                <button onClick={() => handleBlogList()} className="cursor-pointer relative p-2 text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.45 3.45L21 3m-14.55 4.5L21 6m-14.55 4.5L21 9m-18 4.5h18m-18 4.5h18M3 21h18" />
+                        <circle cx="3" cy="3" r=".5" fill="currentColor" />
+                        <circle cx="3" cy="7.5" r=".5" fill="currentColor" />
+                        <circle cx="3" cy="12" r=".5" fill="currentColor" />
+                    </svg>
+                </button>
+
                 {/* Notifications */}
                 <button className="cursor-pointer relative p-2 text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-colors">
                     <div className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></div>

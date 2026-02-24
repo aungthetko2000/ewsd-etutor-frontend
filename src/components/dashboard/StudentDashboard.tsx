@@ -1,5 +1,6 @@
 import { useState } from "react";
 import DashboardLayout from "./layout/DashboardLayout";
+import BlogUpload from "../blog/BlogUpload";
 
 const IconDashboard = ({ className }: any) => (
     <svg
@@ -26,7 +27,7 @@ const StudentDashboard = () => {
     const renderContent = () => {
         switch (activeTab) {
             case "dashboard":
-                return <div></div>;
+                return <BlogUpload />;
             default:
                 return;
         }

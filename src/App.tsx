@@ -5,6 +5,7 @@ import { AuthProvider } from './components/auth/AuthContext.tsx';
 import LoginForm from "./components/LoginForm.tsx";
 import ProtectedRoute from './components/auth/ProtectedRoute.tsx';
 import Dashboard from './components/DashBoard.tsx';
+import BlogList from './components/blog/BlogList.tsx';
 
 function App() {
      return (
@@ -13,6 +14,11 @@ function App() {
                     <BrowserRouter>
                          <Routes>
                               <Route path="/" element={<LoginForm />} />
+                              <Route path="/blog-list" element={
+                                   <ProtectedRoute>
+                                         <BlogList />
+                                   </ProtectedRoute>
+                              } />
                               <Route path="/dashboard" element={
                                    <ProtectedRoute>
                                         <Dashboard />
