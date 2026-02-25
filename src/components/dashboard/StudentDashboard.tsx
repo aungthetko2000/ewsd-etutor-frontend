@@ -37,6 +37,7 @@ const StudentDashboard = () => {
             menu={menu}
             activeTab={activeTab}
             onTabChange={setActiveTab}
+            name="Student Dashboard"
         >
             {renderContent()}
         </DashboardLayout>

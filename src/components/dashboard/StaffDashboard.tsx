@@ -59,6 +59,7 @@ const StaffDashboard = () => {
             menu={menu}
             activeTab={activeTab}
             onTabChange={setActiveTab}
+            name="Staff Dashboard"
         >
             {renderContent()}
         </DashboardLayout>

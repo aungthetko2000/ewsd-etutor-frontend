@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useStore } from "../../store/useStore";
 import { observer } from "mobx-react-lite";
 
-const Header = observer(({ onMenuClick }: { onMenuClick: () => void }) => {
+const Header = observer(({ onMenuClick, name }: { onMenuClick: () => void; name: string }) => {
 
     const { userStore } = useStore();
 
@@ -36,7 +36,7 @@ const Header = observer(({ onMenuClick }: { onMenuClick: () => void }) => {
                         <span className="h-1.5 w-1.5 rounded-full bg-orange-500 animate-pulse"></span>
                         <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Portal</h2>
                     </div>
-                    <span className="text-lg font-extrabold text-slate-800 tracking-tight">Tutor Dashboard</span>
+                    <span className="text-lg font-extrabold text-slate-800 tracking-tight">{name}</span>
                 </div>
             </div>
 

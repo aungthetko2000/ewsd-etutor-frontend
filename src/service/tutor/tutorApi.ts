@@ -1,11 +1,8 @@
-import axios from "axios";
-
-const API_BASE_URL = 'http://localhost:8080/api';
+import api from "../api";
 
 export const tutorApi = {
 
     getAllTutors: async () => {
-        const response = await axios.get(`${API_BASE_URL}/v1/tutors/fetchAllTutors`);
-        return response;
+        return api.get('/tutors/fetchAllTutors');
     },
 }

@@ -29,15 +29,9 @@ const SideBar = ({
     };
 
     return (
-        <aside className={`
-    /* 1. Mobile Styles: Floating on top */
-    fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200 flex flex-col
-    transition-transform duration-300 ease-in-out
-    ${isOpen ? "translate-x-0" : "-translate-x-full"}
-
-    /* 2. Desktop Styles: Sitting side-by-side */
-    lg:static lg:translate-x-0 lg:z-auto
-`}>
+        <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200 flex flex-col
+                            transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"}
+                            lg:static lg:translate-x-0 lg:z-auto`}>
             {/* Mobile Close Button */}
             <button
                 onClick={onClose}

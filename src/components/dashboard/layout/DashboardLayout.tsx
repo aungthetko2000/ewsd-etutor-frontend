@@ -7,6 +7,7 @@ type DashboardLayoutProps = {
     activeTab: string;
     onTabChange: (key: string) => void;
     children: React.ReactNode;
+    name: string;
 };
 
 const DashboardLayout = ({
@@ -14,6 +15,7 @@ const DashboardLayout = ({
     activeTab,
     onTabChange,
     children,
+    name
 }: DashboardLayoutProps) => {
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -42,7 +44,7 @@ const DashboardLayout = ({
 
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
                 {/* Pass the toggle function to Header */}
-                <Header onMenuClick={() => setIsSidebarOpen(true)} />
+                <Header onMenuClick={() => setIsSidebarOpen(true)} name={name}/>
 
                 <main className="flex-1 p-4 md:p-10 overflow-y-auto">
                     {children}

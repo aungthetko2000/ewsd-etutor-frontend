@@ -1,41 +1,34 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useStore } from "../store/useStore";
 import { observer } from "mobx-react-lite";
-import { RiseLoader } from "react-spinners";
-
-interface Student {
-    id: number;
-    name: string;
-    grade: string;
-    subject: string;
-    avatar?: string;
-}
+import { BounceLoader, HashLoader, PropagateLoader, RiseLoader } from "react-spinners";
+import LoaderIcon from "../common/LoaderIcon";
 
 const AllocationScreen = observer(() => {
-    const { tutorStore } = useStore();
+    const { tutorStore, studentStore, staffStore } = useStore();
 
     useEffect(() => {
         clearData();
         tutorStore.getAllTutors();
-    }, [tutorStore]);
+        studentStore.getAllStudents();
+    }, [tutorStore, studentStore]);
 
     const clearData = () => {
         tutorStore.state.clearSelectedTutor();
+        studentStore.state.clearSelectedStudents();
     };
 
-    const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
-
-    const students: Student[] = [
-        { id: 1, name: "Alice Thompson", grade: "Year 11", subject: "Mathematics" },
-        { id: 2, name: "James Wilson", grade: "Year 10", subject: "Physics" },
-        { id: 3, name: "Sophia Chen", grade: "Year 12", subject: "Chemistry" },
-        { id: 4, name: "Liam O'Connor", grade: "Year 11", subject: "Biology" },
-    ];
-
     const toggleStudent = (id: number) => {
-        setSelectedStudents((prev) =>
-            prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id],
-        );
+        studentStore.state.toggleStudent(id);
+    };
+
+    const handleBulkAllocate = () => {
+        const tutorId = tutorStore.state.selectedTutor?.id;
+        const studentsId = studentStore.state.selectedStudent;
+
+        if (!tutorId || studentsId.length === 0) return;
+
+        staffStore.bulkAllocateStudents(studentsId, tutorId);
     };
 
     return (
@@ -59,16 +52,8 @@ const AllocationScreen = observer(() => {
 
             {/* 1. Added 'relative' here to contain the absolute loader */}
             <div className="max-w-[1600px] mx-auto relative">
-                {/* 2. Changed 'fixed' to 'absolute' and z-index to sit properly */}
-                {tutorStore.state.loading && (
-                    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/60 backdrop-blur-md rounded-[3rem]">
-                        <div className="flex flex-col items-center p-12">
-                            <RiseLoader color={"#ea580c"} size={20} />
-                            <p className="mt-8 text-[10px] font-black uppercase tracking-[0.3em] text-orange-600 animate-pulse">
-                                Processing
-                            </p>
-                        </div>
-                    </div>
+                {(tutorStore.state.loading || staffStore.state.loading) && (
+                    <LoaderIcon />
                 )}
 
                 <div className="grid grid-cols-12 gap-8">
@@ -114,35 +99,39 @@ const AllocationScreen = observer(() => {
 
                         <div className="flex-1 bg-white/60 backdrop-blur-sm border border-white rounded-[2.5rem] p-4 shadow-xl shadow-slate-200/50 overflow-hidden flex flex-col">
                             <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
-                                {students.map((student) => (
+                                {studentStore.state.students.map((student) => (
                                     <div
                                         key={student.id}
                                         onClick={() => toggleStudent(student.id)}
-                                        className={`group p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${selectedStudents.includes(student.id)
+                                        className={`group p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${studentStore.state.selectedStudent?.includes(student.id)
                                                 ? "border-orange-500 bg-white shadow-md"
                                                 : "border-transparent bg-white hover:border-slate-200"
                                             }`}
                                     >
                                         <div className="flex items-center gap-3">
                                             <div
-                                                className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${selectedStudents.includes(student.id)
+                                                className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${studentStore.state.selectedStudent?.includes(
+                                                    student.id,
+                                                )
                                                         ? "bg-orange-500 text-white"
                                                         : "bg-slate-100 text-slate-400"
                                                     }`}
                                             >
-                                                {student.name.charAt(0)}
+                                                {student.fullName.charAt(0)}
                                             </div>
                                             <div className="flex-1 truncate">
                                                 <h4 className="font-bold text-slate-800 text-sm truncate">
-                                                    {student.name}
+                                                    {student.fullName}
                                                 </h4>
-                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
+                                                {/* <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
                                                     {student.subject}
-                                                </p>
+                                                </p> */}
                                             </div>
-                                            {selectedStudents.includes(student.id) && (
-                                                <div className="w-2 h-2 rounded-full bg-orange-500" />
-                                            )}
+                                            {studentStore.state.selectedStudent?.includes(
+                                                student.id,
+                                            ) && (
+                                                    <div className="w-2 h-2 rounded-full bg-orange-500" />
+                                                )}
                                         </div>
                                     </div>
                                 ))}
@@ -282,12 +271,15 @@ const AllocationScreen = observer(() => {
 
                                     <div className="flex-1 flex flex-col min-h-0 mb-8">
                                         <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-4 px-1">
-                                            Allocation List ({selectedStudents.length})
+                                            Allocation List (
+                                            {studentStore.state.selectedStudent?.length})
                                         </p>
                                         <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-2">
-                                            {selectedStudents.length > 0 ? (
-                                                selectedStudents.map((id) => {
-                                                    const s = students.find((st) => st.id === id);
+                                            {studentStore.state.selectedStudent?.length > 0 ? (
+                                                studentStore.state.selectedStudent?.map((id) => {
+                                                    const s = studentStore.state.students.find(
+                                                        (st) => st.id === id,
+                                                    );
                                                     return (
                                                         <div
                                                             key={id}
@@ -295,7 +287,7 @@ const AllocationScreen = observer(() => {
                                                         >
                                                             <div className="flex items-center gap-2">
                                                                 <div className="w-1.5 h-1.5 rounded-full bg-orange-400" />
-                                                                {s?.name}
+                                                                {s?.fullName}
                                                             </div>
                                                             <button
                                                                 onClick={() => toggleStudent(id)}
@@ -342,12 +334,14 @@ const AllocationScreen = observer(() => {
                                     </div>
 
                                     <button
+                                        onClick={() => handleBulkAllocate()}
                                         disabled={
+                                            staffStore.state.loading ||
                                             !tutorStore.state.selectedTutor ||
-                                            selectedStudents.length === 0
+                                            studentStore.state.selectedStudent.length === 0
                                         }
                                         className={`w-full py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] text-[11px] transition-all duration-300 shadow-xl ${tutorStore.state.selectedTutor &&
-                                                selectedStudents.length > 0
+                                                studentStore.state.selectedStudent.length > 0
                                                 ? "cursor-pointer bg-orange-500 text-white shadow-orange-200 hover:-translate-y-1 active:scale-95"
                                                 : "bg-slate-100 text-slate-300 cursor-not-allowed"
                                             }`}

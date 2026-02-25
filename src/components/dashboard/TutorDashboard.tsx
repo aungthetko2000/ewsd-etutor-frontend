@@ -60,6 +60,7 @@ const TutorDashBoard = () => {
             menu={menu}
             activeTab={activeTab}
             onTabChange={setActiveTab}
+            name="Tutor Dashboard"
         >
             {renderContent()}
         </DashboardLayout>
