@@ -11,9 +11,11 @@ const api = axios.create({
 
 api.interceptors.request.use(
     (config) => {
-        const token = sessionStorage.getItem('accessToken');
-        if (token) {
+        if (!config.url?.includes("/refresh") && !config.url?.includes("/login")) {
+          const token = sessionStorage.getItem('accessToken');
+          if (token) {
             config.headers.Authorization = `Bearer ${token}`;
+          }  
         }
         return config;
     },

@@ -56,8 +56,9 @@ export const AuthProvider = ({ children }: any) => {
         sessionStorage.setItem("user", JSON.stringify(data.userInfo));
         sessionStorage.setItem("permissions", JSON.stringify(data.permissions));
         sessionStorage.setItem("roles", JSON.stringify(data.roles));
-        sessionStorage.setItem("accessToken", JSON.stringify(data.accessToken));
-        sessionStorage.setItem("refreshToken", JSON.stringify(data.refreshToken));
+        
+        sessionStorage.setItem("accessToken",data.accessToken);
+        sessionStorage.setItem("refreshToken", data.refreshToken);
         notifyAuthUpdated(data);
     };
 
