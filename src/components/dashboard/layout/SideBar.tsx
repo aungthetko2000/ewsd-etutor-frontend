@@ -29,9 +29,15 @@ const SideBar = ({
     };
 
     return (
-        <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200 flex flex-col
-                            transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"}
-                            lg:static lg:translate-x-0 lg:z-auto`}>
+        <aside className={`
+    /* 1. Mobile Styles: Floating on top */
+    fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200 flex flex-col
+    transition-transform duration-300 ease-in-out
+    ${isOpen ? "translate-x-0" : "-translate-x-full"}
+
+    /* 2. Desktop Styles: Sitting side-by-side */
+    lg:static lg:translate-x-0 lg:z-auto
+`}>
             {/* Mobile Close Button */}
             <button
                 onClick={onClose}
@@ -84,7 +90,7 @@ const SideBar = ({
                         onClick={() => onTabChange(key)}
                         className={`cursor-pointer flex items-center gap-3 w-full px-4 py-3.5 rounded-xl text-sm font-medium transition-all duration-200
                                         ${activeTab === key
-                                ? "bg-orange-50 text-orange-600 shadow-sm shadow-orange-100"
+                                ? "bg-gradient-to-br from-orange-50 to-rose-50 text-rose-600 shadow-sm shadow-orange-100"
                                 : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
                             }`}
                     >
@@ -99,7 +105,7 @@ const SideBar = ({
             <div className="p-4 mt-auto border-t border-slate-100">
                 <button
                     onClick={() => handleLogOut()}
-                    className="cursor-pointer group relative flex items-center justify-center gap-3 w-full bg-slate-900 text-white px-5 py-3.5 rounded-xl font-semibold text-sm transition-all hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-200 active:scale-[0.98]"
+                    className="cursor-pointer group relative flex items-center justify-center gap-3 w-full bg-slate-900 text-white px-5 py-3.5 rounded-xl font-semibold text-sm transition-all hover:bg-gradient-to-br from-orange-500 to-rose-500 hover:shadow-lg hover:shadow-orange-200 active:scale-[0.98]"
                 >
                     {/* Modern Exit SVG (Placed before text) */}
                     <svg

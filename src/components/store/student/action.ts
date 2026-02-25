@@ -12,7 +12,14 @@ export class StudentAction {
     }
 
     getAllUnassignedStudents = async () => {
-        const response = await studentApi.getAllUnassignedStudent(true);
-        this.state.setStudents(response.data.data);
+        this.state.loading = true
+        try {
+             const response = await studentApi.getAllUnassignedStudent(true);
+             this.state.setStudents(response.data.data);
+        } catch (error) {
+             console.error("Failed to fetch unassigned students", error);
+        } finally {
+            this.state.loading = false
+        }
     }
 }

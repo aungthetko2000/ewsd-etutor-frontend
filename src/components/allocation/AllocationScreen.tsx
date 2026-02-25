@@ -1,17 +1,30 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useStore } from "../store/useStore";
 import { observer } from "mobx-react-lite";
-import { BounceLoader, HashLoader, PropagateLoader, RiseLoader } from "react-spinners";
 import LoaderIcon from "../common/LoaderIcon";
 
 const AllocationScreen = observer(() => {
+
     const { tutorStore, studentStore, staffStore } = useStore();
+
+    const ITEMS_PER_PAGE = 8;
+    const [currentPage, setCurrentPage] = useState(1);
+    const students = studentStore.state.filterStudents ?? [];
+    const totalPages = Math.ceil(students.length / ITEMS_PER_PAGE);
+    const paginatedStudents = students.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    );
 
     useEffect(() => {
         clearData();
         tutorStore.getAllTutors();
-        studentStore.getAllStudents();
-    }, [tutorStore, studentStore]);
+        studentStore.getAllUnassignedStudents();
+    }, []);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [studentStore.state.searchText]);
 
     const clearData = () => {
         tutorStore.state.clearSelectedTutor();
@@ -29,7 +42,14 @@ const AllocationScreen = observer(() => {
         if (!tutorId || studentsId.length === 0) return;
 
         staffStore.bulkAllocateStudents(studentsId, tutorId);
+
+        // Update Student List in state
+        studentStore.state.removeStudentsByIds(studentsId);
     };
+
+    const handleOnChagne = (value: string) => {
+        studentStore.state.searchStudent(value);
+    }
 
     return (
         <div className="min-h-screen bg-[#F8FAFC] p-8 font-sans">
@@ -52,7 +72,7 @@ const AllocationScreen = observer(() => {
 
             {/* 1. Added 'relative' here to contain the absolute loader */}
             <div className="max-w-[1600px] mx-auto relative">
-                {(tutorStore.state.loading || staffStore.state.loading) && (
+                {(tutorStore.state.loading || staffStore.state.loading || studentStore.state.loading) && (
                     <LoaderIcon />
                 )}
 
@@ -67,11 +87,11 @@ const AllocationScreen = observer(() => {
                                         01
                                     </div>
                                     <h2 className="text-sm font-black uppercase tracking-widest text-slate-500">
-                                        Unassigned Pool
+                                        Unassigned Students
                                     </h2>
                                 </div>
                                 <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-2 py-1 rounded-md">
-                                    Total: 128
+                                    Total: {studentStore.state.students.length}
                                 </span>
                             </div>
 
@@ -93,19 +113,20 @@ const AllocationScreen = observer(() => {
                                     type="text"
                                     placeholder="Search student name..."
                                     className="w-full bg-white border border-slate-200 rounded-2xl py-3 pl-11 pr-4 text-sm outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/5 transition-all shadow-sm"
+                                    onChange={(e) => handleOnChagne(e.target.value)}
                                 />
                             </div>
                         </div>
 
                         <div className="flex-1 bg-white/60 backdrop-blur-sm border border-white rounded-[2.5rem] p-4 shadow-xl shadow-slate-200/50 overflow-hidden flex flex-col">
                             <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
-                                {studentStore.state.students.map((student) => (
+                                {paginatedStudents.map((student) => (
                                     <div
                                         key={student.id}
                                         onClick={() => toggleStudent(student.id)}
                                         className={`group p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${studentStore.state.selectedStudent?.includes(student.id)
-                                                ? "border-orange-500 bg-white shadow-md"
-                                                : "border-transparent bg-white hover:border-slate-200"
+                                            ? "border-orange-500 bg-white shadow-md"
+                                            : "border-transparent bg-white hover:border-slate-200"
                                             }`}
                                     >
                                         <div className="flex items-center gap-3">
@@ -113,8 +134,8 @@ const AllocationScreen = observer(() => {
                                                 className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${studentStore.state.selectedStudent?.includes(
                                                     student.id,
                                                 )
-                                                        ? "bg-orange-500 text-white"
-                                                        : "bg-slate-100 text-slate-400"
+                                                    ? "bg-orange-500 text-white"
+                                                    : "bg-slate-100 text-slate-400"
                                                     }`}
                                             >
                                                 {student.fullName.charAt(0)}
@@ -138,7 +159,9 @@ const AllocationScreen = observer(() => {
                             </div>
 
                             <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
-                                <button className="p-2 hover:bg-slate-100 rounded-xl text-slate-400 transition-colors">
+                                <button
+                                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} 
+                                    className="cursor-pointer p-2 hover:bg-slate-100 rounded-xl text-rose-400 transition-colors">
                                     <svg
                                         className="w-4 h-4"
                                         fill="none"
@@ -154,19 +177,23 @@ const AllocationScreen = observer(() => {
                                     </svg>
                                 </button>
                                 <div className="flex gap-1">
-                                    {[1, 2, 3].map((page) => (
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                                         <button
                                             key={page}
-                                            className={`w-8 h-8 text-[10px] font-black rounded-lg transition-all ${page === 1
-                                                    ? "bg-orange-500 text-white shadow-lg shadow-orange-200"
-                                                    : "text-slate-400 hover:bg-slate-100"
+                                            onClick={() => setCurrentPage(page)}
+                                            className={`cursor-pointer w-8 h-8 text-[10px] font-black rounded-lg transition-all ${page === currentPage
+                                                ? "bg-gradient-to-br from-orange-500 to-rose-500 text-white shadow-lg shadow-rose-200"
+                                                : "text-slate-400 hover:bg-slate-100"
                                                 }`}
                                         >
                                             {page}
                                         </button>
                                     ))}
                                 </div>
-                                <button className="p-2 hover:bg-slate-100 rounded-xl text-slate-400 transition-colors">
+                                <button
+                                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="cursor-pointer p-2 hover:bg-slate-100 rounded-xl text-rose-400 transition-colors">
                                     <svg
                                         className="w-4 h-4"
                                         fill="none"
@@ -202,8 +229,8 @@ const AllocationScreen = observer(() => {
                                     key={tutor.id}
                                     onClick={() => tutorStore.state.selectTutor(tutor)}
                                     className={`group p-6 rounded-[2.5rem] border-2 transition-all duration-500 cursor-pointer overflow-hidden relative ${tutorStore.state.selectedTutor?.id === tutor.id
-                                            ? "border-orange-500 bg-white shadow-2xl -translate-y-1"
-                                            : "border-white bg-white/40 hover:bg-white hover:border-orange-500"
+                                        ? "border-orange-500 bg-white shadow-2xl -translate-y-1"
+                                        : "border-white bg-white/40 hover:bg-white hover:border-orange-500"
                                         }`}
                                 >
                                     {tutorStore.state.selectedTutor?.id === tutor.id && (
@@ -341,9 +368,9 @@ const AllocationScreen = observer(() => {
                                             studentStore.state.selectedStudent.length === 0
                                         }
                                         className={`w-full py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] text-[11px] transition-all duration-300 shadow-xl ${tutorStore.state.selectedTutor &&
-                                                studentStore.state.selectedStudent.length > 0
-                                                ? "cursor-pointer bg-orange-500 text-white shadow-orange-200 hover:-translate-y-1 active:scale-95"
-                                                : "bg-slate-100 text-slate-300 cursor-not-allowed"
+                                            studentStore.state.selectedStudent.length > 0
+                                            ? "cursor-pointer bg-gradient-to-br from-orange-500 to-rose-500 text-white hover:-translate-y-1 active:scale-95"
+                                            : "bg-slate-100 text-slate-300 cursor-not-allowed"
                                             }`}
                                     >
                                         Confirm Allocation

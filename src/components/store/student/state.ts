@@ -9,6 +9,8 @@ export class StudentState {
 
     students: Student[] = []
     selectedStudent: number[] = [];
+    searchText = '';
+    loading: boolean = false;
 
     constructor() {
         makeAutoObservable(this)
@@ -29,6 +31,27 @@ export class StudentState {
     }
 
     clearSelectedStudents() {
+        this.selectedStudent = [];
+    }
+
+    searchStudent(value: string) {
+        this.searchText = value;
+    }
+
+    get filterStudents() {
+        const text = this.searchText.trim().toLocaleLowerCase();
+        if (!text) {
+            return this.students;
+        }
+        return this.students.filter(student =>
+            student.fullName.toLocaleLowerCase().includes(text)
+        )
+    }
+
+    removeStudentsByIds(ids: number[]) {
+        this.students = this.students.filter(
+            (student) => !ids.includes(student.id)
+        );
         this.selectedStudent = [];
     }
 }
