@@ -51,7 +51,6 @@ const MOCK_LINKS: Record<string, string> = {
   teams: "https://teams.microsoft.com/l/meetup-join/etutoring",
   gmeet: "https://meet.google.com/etutoring-session",
 };
-const DURATIONS = ["15 Minutes", "30 Minutes", "45 Minutes", "60 Minutes", "90 Minutes", "120 Minutes"];
 
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -262,7 +261,6 @@ function AddEventModal({ date, onClose, onSave }: AddModalProps) {
   const [notes,           setNotes]           = useState("");
   const [color,           setColor]           = useState<CalendarEvent["color"]>("indigo");
   const [errors,          setErrors]          = useState<Record<string, string>>({});
-  const [time, setTime] = useState("");
 
 
 
