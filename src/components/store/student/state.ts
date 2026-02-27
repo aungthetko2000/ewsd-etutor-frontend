@@ -11,6 +11,7 @@ export class StudentState {
     selectedStudent: number[] = [];
     searchText = '';
     loading: boolean = false;
+    assignedStudents: Student[] = [];
 
     constructor() {
         makeAutoObservable(this)
@@ -18,6 +19,10 @@ export class StudentState {
 
     setStudents(students: Student[]) {
         this.students = students;
+    }
+
+    setAssignedStudents(students: Student[]) {
+        this.assignedStudents = students;
     }
 
     toggleStudent(id: number) {

@@ -8,5 +8,9 @@ export const studentApi = {
                 unassignedOnly: unassigned,
             },
         });
+    },
+
+    getAllAssignedStudent: async (tutorId: number) => {
+        return api.get(`/students/assigned?tutorId=${tutorId}`);
     }
 }

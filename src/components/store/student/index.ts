@@ -6,5 +6,6 @@ const action = new StudentAction(state);
 
 export const studentStore = {
     state,
-    getAllUnassignedStudents: action.getAllUnassignedStudents
+    getAllUnassignedStudents: action.getAllUnassignedStudents,
+    getAllAssignedStudents: action.getAllAssignedStudents
 }

@@ -41,7 +41,8 @@ const TutorDashBoard = () => {
 
     const menu = [
         { key: "dashboard", label: "Dashboard", icon: IconDashboard },
-        { key: "schedule", label: "Schedule", icon: IconSchedule }
+        { key: "schedule", label: "Schedule", icon: IconSchedule },
+        { key: "assigned-students", label: "Students", icon: IconSchedule }
     ];
 
     const renderContent = () => {
@@ -50,6 +51,7 @@ const TutorDashBoard = () => {
                 return;
             case "schedule":
                 return <CalendarSchedule />;
+
             default:
                 return;
         }
