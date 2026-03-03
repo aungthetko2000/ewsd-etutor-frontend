@@ -2,8 +2,15 @@ import { useEffect } from "react";
 import { useStore } from "../../store/useStore";
 import { observer } from "mobx-react-lite";
 
-const Header = observer(({ onMenuClick, name }: { onMenuClick: () => void; name: string }) => {
-
+const Header = observer(({ 
+    onMenuClick, 
+    name, 
+    onBlogClick 
+}: { 
+    onMenuClick: () => void; 
+    name: string; 
+    onBlogClick?: () => void; 
+}) => {
     const { userStore } = useStore();
 
     useEffect(() => {
@@ -41,6 +48,22 @@ const Header = observer(({ onMenuClick, name }: { onMenuClick: () => void; name:
             </div>
 
             <div className="flex items-center gap-4">
+                {/* 📄 Blog Icon */}
+                <button onClick={onBlogClick} className="cursor-pointer relative p-2 text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-colors">
+                <svg
+                    className="w-6 h-6"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                >
+                    <rect x="4" y="3" width="16" height="18" rx="2" ry="2" />
+                    <line x1="8" y1="8" x2="16" y2="8" />
+                    <line x1="8" y1="12" x2="16" y2="12" />
+                    <line x1="8" y1="16" x2="13" y2="16" />
+                </svg>
+                </button>
+
                 {/* Notifications */}
                 <button className="cursor-pointer relative p-2 text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-colors">
                     <div className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></div>
