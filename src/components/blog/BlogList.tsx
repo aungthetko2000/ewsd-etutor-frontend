@@ -1,10 +1,8 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
-type BlogListProps = {
-    onBack: () => void;
-};
 
-const BlogList = ({ onBack }: BlogListProps) => {
+
+const BlogList = () => {
 
   const [blogs] = useState([
     {
@@ -292,14 +290,6 @@ filtered.sort((a, b) => {
         )}
       </main>
 
-            <button
-                onClick={onBack}
-                className="px-4 py-2 text-sm font-semibold 
-                           bg-gradient-to-tr from-orange-500 to-rose-500 
-                           text-white rounded-lg hover:opacity-90 transition"
-            >
-                Back to Dashboard
-            </button>
     </div>
 
   );
