@@ -27,7 +27,7 @@ const SideBar = ({
         sessionStorage.clear();
         navigate("/");
     };
-
+    
     return (
         <aside className={`
     /* 1. Mobile Styles: Floating on top */

@@ -1,0 +1,135 @@
+import { makeAutoObservable } from "mobx";
+import type { ArrangeMeetingSchedulePayload, MeetingType } from "../../../service/meeting/meetingApi";
+import { calculateDuration } from "./function";
+import type { EventColor } from "../../../service/meeting/calendar";
+
+interface CalendarEvent {
+    id: string;
+    title: string;
+    time: string;
+    duration: string;
+    notes: string;
+    color?: EventColor
+}
+
+interface EventMap {
+    [dateKey: string]: CalendarEvent[];
+}
+
+export interface MeetingSchedule {
+    id: number;
+    meetingTitle: string;
+    description: string;
+    scheduledAt: string;
+    startTime: string;
+    endTime: string;
+    meetingType: "VIRTUAL" | "PHYSICAL";
+    tutorId: number;
+    students: any[];
+    location?: string;
+    virtualPlatform?: string;
+    virtualPlatformLink?: string;
+    sessionColor: EventColor
+}
+
+export class MeetingState {
+    meetingTitle: string = "";
+    scheduledAt: string = "";
+    startTime: string = "";
+    endTime: string = "";
+    tutorEmail: string = "";
+    studentEmail: string[] = [];
+    meetingType: MeetingType = "IN_PERSON";
+    sessionColor = "";
+    description = "";
+    location = "";
+    virtualPlatform = "";
+    virtualPlatformLink = "";
+    message: string = "";
+    loading: boolean = false;
+    meetingSchedules: MeetingSchedule[] = []
+    suggestion: string[] = [] 
+
+    constructor() {
+        makeAutoObservable(this);
+    }
+
+    setMessage(messge: string) {
+        this.message = messge;
+    }
+
+    setLoading(value: boolean) {
+        this.loading = value;
+    }
+
+    setMeetingSchedules(meetingSchedules: MeetingSchedule[]) {
+        this.meetingSchedules = meetingSchedules
+    }
+
+    setField<K extends keyof MeetingState>(key: K, value: MeetingState[K]) {
+        (this as MeetingState)[key] = value;
+    }
+
+    setSuggestion(suggestion: string[]) {
+        this.suggestion = suggestion;
+    }
+
+    resetForm() {
+        this.meetingTitle = "";
+        this.scheduledAt = "";
+        this.startTime = "";
+        this.endTime = "";
+        this.tutorEmail = "";
+        this.studentEmail = [];
+        this.meetingType = "IN_PERSON";
+        this.sessionColor = "";
+        this.description = "";
+        this.location = "",
+        this.virtualPlatform = "",
+        this.virtualPlatformLink = ""
+    }
+
+    createMeetingPayload(): ArrangeMeetingSchedulePayload {
+        return {
+            meetingTitle: this.meetingTitle,
+            scheduledAt: this.scheduledAt,
+            startTime: this.startTime,
+            endTime: this.endTime,
+            tutorEmail: this.tutorEmail,
+            studentEmail: this.studentEmail,
+            meetingType: this.meetingType,
+            sessionColor: this.sessionColor,
+            description: this.description,
+            location: this.location,
+            virtualPlatform: this.virtualPlatform,
+            virtualPlatformLink: this.virtualPlatformLink
+        }
+    }
+
+    get calendarEventMap(): EventMap {
+        const map: EventMap = {};
+
+        this.meetingSchedules.forEach(m => {
+            const date = new Date(m.scheduledAt);
+
+            const key = `${date.getFullYear()}-${String(
+                date.getMonth() + 1
+            ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+            if (!map[key]) {
+                map[key] = [];
+            }
+
+            map[key].push({
+                id: String(m.id),
+                title: m.meetingTitle,
+                time: m.startTime.slice(0, 5),
+                duration: calculateDuration(m.startTime, m.endTime),
+                notes: m.description ?? "",
+                color: m.sessionColor,
+            });
+        });
+
+        return map;
+    }
+}
