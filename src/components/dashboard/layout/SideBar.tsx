@@ -28,6 +28,13 @@ const SideBar = ({
         navigate("/");
     };
 
+    <button
+  onClick={() => navigate("/blogs")}
+  className="mt-4 px-6 py-2 bg-gradient-to-tr from-orange-500 to-rose-500 text-white font-semibold rounded-lg shadow-md hover:opacity-90 transition"
+>
+  See More Blogs
+</button>
+
     return (
         <aside className={`
     /* 1. Mobile Styles: Floating on top */
