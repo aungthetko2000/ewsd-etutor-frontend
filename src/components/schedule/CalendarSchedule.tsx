@@ -90,10 +90,9 @@ const CalendarSchedule = observer(() => {
           + Add Session
         </button>
       </div>
-
+      
       {/* Calendar */}
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        {meetingStore.state.loading && (<LoaderIcon />)}
         <div className="grid grid-cols-7 border-b border-gray-100 bg-gray-50">
           {WEEKDAYS.map(d => (
             <div key={d} className="py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-400">{d}</div>
@@ -116,7 +115,7 @@ const CalendarSchedule = observer(() => {
 
             const todayCell = isCurrentMonth && isToday(dayNum);
             const isPast = isCurrentMonth && new Date(currentYear, currentMonth, dayNum) < todayStart;
-
+            console.log("Meeting loading", meetingStore.state.loading);
             return (
               <div
                 key={i}
@@ -167,6 +166,7 @@ const CalendarSchedule = observer(() => {
       </div>
 
       {/* Modals */}
+      
       <AddEventModal
         date={addModalDate}
         onClose={() => setAddModalDate(null)}

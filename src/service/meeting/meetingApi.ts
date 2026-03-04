@@ -17,6 +17,19 @@ export interface ArrangeMeetingSchedulePayload {
   virtualPlatformLink: string;
 }
 
+export const MeetingStatus = {
+  PENDING: "PENDING",
+  CONFIRMED: "CONFIRMED",
+  DECLINED: "DECLINED",
+} as const;
+
+export type MeetingStatus = typeof MeetingStatus[keyof typeof MeetingStatus];
+
+export interface MeetingConfirmationRequest {
+  meetingStatus: MeetingStatus;
+  reason?: string;
+}
+
 export const meetingApi = {
     arrangeMeeting: async (payload: ArrangeMeetingSchedulePayload) => {
         return api.post("/meeting", payload);
@@ -26,7 +39,11 @@ export const meetingApi = {
         return api.get("/meeting");
     },
 
-    getAllStudentEmails: async (tutorId: number, email: string) => {
-        return api.get(`/meeting/${tutorId}/students/emails?email=${email}`);
+    getAllStudentEmails: async (userId: number, email: string) => {
+        return api.get(`/meeting/${userId}/students/emails?email=${email}`);
+    },
+
+    updateMeetingStatus: async (meetingId: number, payload: MeetingConfirmationRequest) => {
+        return api.post(`/meeting/status/${meetingId}`, payload);
     }
 }

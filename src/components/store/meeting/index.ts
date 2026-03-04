@@ -8,5 +8,6 @@ export const meetingStore = {
     state,
     arrangeMeeting: action.arrangeMeetingSchedule,
     gtAllMeetingSchedule: action.getAllMeetingSchedule,
-    getAllStudentEmail: action.getStudentEmailByTutor
+    getAllStudentEmail: action.getStudentEmailByTutor,
+    updateMeetingStatus: action.updateMeetingSatus
 }
