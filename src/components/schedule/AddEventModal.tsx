@@ -19,6 +19,7 @@ const AddEventModal = observer(({ date, onClose }: AddModalProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    meetingStore.state.resetForm();
     const handler = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false);
@@ -134,7 +135,7 @@ const AddEventModal = observer(({ date, onClose }: AddModalProps) => {
                 </svg>
                 <input
                   type="date"
-                  value={meetingStore.state.scheduledAt || defaultDate}
+                  value={meetingStore.state.scheduledAt}
                   min={todayStr}
                   className="flex-1 min-w-0 bg-transparent py-2.5 text-sm font-medium text-gray-700 outline-none cursor-pointer"
                   onChange={(e) => {

@@ -20,13 +20,16 @@ const StudentDashboard = () => {
     const [activeTab, setActiveTab] = useState("dashboard");
 
     const menu = [
-        { key: "dashboard", label: "Dashboard", icon: IconDashboard }
+        { key: "dashboard", label: "Dashboard", icon: IconDashboard },
+        { key: "hello", label: "hello", icon: IconDashboard }
     ];
 
     const renderContent = () => {
         switch (activeTab) {
             case "dashboard":
                 return <div></div>;
+            case "hello":
+                return <div>Hello World</div>;
             default:
                 return;
         }

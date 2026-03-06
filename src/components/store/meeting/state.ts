@@ -1,7 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import type { ArrangeMeetingSchedulePayload, MeetingType } from "../../../service/meeting/meetingApi";
 import { calculateDuration } from "./function";
-import type { EventColor } from "../../../service/meeting/calendar";
 
 interface CalendarEvent {
     id: string;
@@ -9,7 +8,7 @@ interface CalendarEvent {
     time: string;
     duration: string;
     notes: string;
-    color?: EventColor
+    sessionColor?: string;
 }
 
 interface EventMap {
@@ -29,12 +28,14 @@ export interface MeetingSchedule {
     location?: string;
     virtualPlatform?: string;
     virtualPlatformLink?: string;
-    sessionColor: EventColor
+    sessionColor: string
 }
+
+const todayStr = new Date().toISOString().split("T")[0];
 
 export class MeetingState {
     meetingTitle: string = "";
-    scheduledAt: string = "";
+    scheduledAt = todayStr;
     startTime: string = "";
     endTime: string = "";
     tutorEmail: string = "";
@@ -52,6 +53,7 @@ export class MeetingState {
 
     constructor() {
         makeAutoObservable(this);
+        this.scheduledAt = todayStr; 
     }
 
     setMessage(messge: string) {
@@ -92,7 +94,7 @@ export class MeetingState {
     createMeetingPayload(): ArrangeMeetingSchedulePayload {
         return {
             meetingTitle: this.meetingTitle,
-            scheduledAt: this.scheduledAt,
+            scheduledAt: this.scheduledAt || todayStr,
             startTime: this.startTime,
             endTime: this.endTime,
             tutorEmail: this.tutorEmail,
@@ -126,7 +128,7 @@ export class MeetingState {
                 time: m.startTime.slice(0, 5),
                 duration: calculateDuration(m.startTime, m.endTime),
                 notes: m.description ?? "",
-                color: m.sessionColor,
+                sessionColor: m.sessionColor ?? "indigo",
             });
         });
 

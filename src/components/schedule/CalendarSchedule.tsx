@@ -5,13 +5,13 @@ import AddEventModal from "./AddEventModal";
 import SessionDetailModal from "./SessionDetailsModal";
 import { useStore } from "../store/useStore";
 import type { CalendarEvent } from "../../service/meeting/calendar";
-import LoaderIcon from "../common/LoaderIcon";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 function EventPill({ event, onClick }: { event: CalendarEvent; onClick: (e: React.MouseEvent) => void }) {
-  const c = COLOR_CLASSES[event.color ?? "indigo"];
+  const colorKey = event.sessionColor && COLOR_CLASSES[event.sessionColor] ? event.sessionColor : "indigo";
+  const c = COLOR_CLASSES[colorKey];
   return (
     <div
       onClick={onClick}
@@ -115,7 +115,7 @@ const CalendarSchedule = observer(() => {
 
             const todayCell = isCurrentMonth && isToday(dayNum);
             const isPast = isCurrentMonth && new Date(currentYear, currentMonth, dayNum) < todayStart;
-            console.log("Meeting loading", meetingStore.state.loading);
+
             return (
               <div
                 key={i}
