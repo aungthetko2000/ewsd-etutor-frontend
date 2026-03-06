@@ -18,6 +18,16 @@ const Header = observer(({ name }: { onMenuClick: () => void; name: string }) =>
     const [errors, setErrors] = useState<Record<number, boolean>>({});
 
     const timeoutRef = useRef<number>(null);
+const Header = observer(({
+    onMenuClick,
+    name,
+    onBlogClick
+}: {
+    onMenuClick: () => void;
+    name: string;
+    onBlogClick?: () => void;
+}) => {
+    const { userStore } = useStore();
 
     useEffect(() => {
         const userInfo = sessionStorage.getItem('user');
@@ -204,6 +214,30 @@ const Header = observer(({ name }: { onMenuClick: () => void; name: string }) =>
                                                             Decline
                                                         </button>
                                                     </div>
+            <div className="flex items-center gap-4">
+                {/* 📄 Blog Icon */}
+                <button onClick={onBlogClick} className="cursor-pointer relative p-2 text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-colors">
+                <svg
+                    className="w-6 h-6"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                >
+                    <rect x="4" y="3" width="16" height="18" rx="2" ry="2" />
+                    <line x1="8" y1="8" x2="16" y2="8" />
+                    <line x1="8" y1="12" x2="16" y2="12" />
+                    <line x1="8" y1="16" x2="13" y2="16" />
+                </svg>
+                </button>
+
+                {/* Notifications */}
+                <button className="cursor-pointer relative p-2 text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-colors">
+                    <div className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></div>
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                </button>
 
                                                     {declineId === meet.id && (
                                                         <div className={`mt-3 p-2 bg-slate-50 rounded-lg animate-in slide-in-from-top-2 ${errors[meet.id] ? 'border-rose-500 bg-rose-50 ring-2 ring-rose-100' : 'border-gray-200 bg-gray-50'}`}>
