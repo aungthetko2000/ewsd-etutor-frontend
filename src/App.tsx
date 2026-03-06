@@ -6,10 +6,13 @@ import LoginForm from "./components/LoginForm.tsx";
 import ProtectedRoute from './components/auth/ProtectedRoute.tsx';
 import Dashboard from './components/DashBoard.tsx';
 import BlogList from './components/blog/BlogList.tsx';
+import { ToastContainer } from 'react-toastify';
+import BlogDetailPage from './components/blog/BlogDetailPage.tsx';
 
 function App() {
      return (
           <>
+          <ToastContainer position="top-right" autoClose={2000} />
                <AuthProvider>
                     <BrowserRouter>
                          <Routes>
@@ -22,6 +25,11 @@ function App() {
                               <Route path="/blogs" element={
                                    <ProtectedRoute>
                                         <BlogList />
+                                   </ProtectedRoute>
+                              } />
+                              <Route path="/blogs/:id" element={
+                                   <ProtectedRoute>
+                                        <BlogDetailPage />
                                    </ProtectedRoute>
                               } />
                          </Routes>
