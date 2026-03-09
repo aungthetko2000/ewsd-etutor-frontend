@@ -6,6 +6,7 @@ import LoginForm from "./components/LoginForm.tsx";
 import ProtectedRoute from './components/auth/ProtectedRoute.tsx';
 import Dashboard from './components/DashBoard.tsx';
 import BlogList from './components/blog/BlogList.tsx';
+import MessengerWidget from './components/message/Message.tsx';
 
 function App() {
      return (
@@ -24,7 +25,9 @@ function App() {
                                         <BlogList />
                                    </ProtectedRoute>
                               } />
+                         
                          </Routes>
+                              <MessengerWidget />
                     </BrowserRouter>
                </AuthProvider>
           </>
