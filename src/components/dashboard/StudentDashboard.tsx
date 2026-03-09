@@ -1,8 +1,7 @@
 import { useState } from "react";
 import DashboardLayout from "./layout/DashboardLayout";
-import BlogList from "../blog/BlogList";
 import NewBlog from '../blog/NewBlog';
-import { useNavigate } from "react-router-dom";
+import BlogDashboard from "../blog/BlogDashboard";
 
 const IconDashboard = ({ className }: any) => (
     <svg
@@ -21,7 +20,7 @@ const IconDashboard = ({ className }: any) => (
 
 const StudentDashboard = () => {
     const [activeTab, setActiveTab] = useState("dashboard");
-    const navigate = useNavigate();
+
     const menu = [
         { key: "dashboard", label: "Dashboard", icon: IconDashboard }
     ];
@@ -31,7 +30,7 @@ const StudentDashboard = () => {
     const renderContent = () => {
         switch (activeTab) {
             case "dashboard":
-                return <button onClick={() => navigate('/blogs')} className="px-4 py-2 text-sm font-semibold bg-gradient-to-tr from-orange-500 to-rose-500 text-white rounded-lg hover:opacity-90 transition">View Blogs</button>;
+                return <BlogDashboard />;
             case "hello":
                 return <div>Hello World</div>;
             default:

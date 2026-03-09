@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useStore } from "../store/useStore";
 import LoaderIcon from "../common/LoaderIcon";
 import { formatDate } from "../store/blog/functions";
@@ -9,6 +9,8 @@ const BlogDetailPage = observer(() => {
   const { id } = useParams();
   const { blogStore } = useStore();
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (id) {
@@ -24,6 +26,10 @@ const BlogDetailPage = observer(() => {
     </div>
   );
 
+  const handleFavorite = (id: number) => {
+    blogStore.increaseFavoriteBlog(id);
+  }
+
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-slate-900 relative selection:bg-orange-100 overflow-x-hidden">
       {blogStore.state.loading && <LoaderIcon />}
@@ -34,6 +40,28 @@ const BlogDetailPage = observer(() => {
       </div>
 
       <header className="max-w-2xl mx-auto pt-16 md:pt-20 pb-8 md:pb-12 px-6">
+        <button
+          onClick={() => navigate("/blogs")}
+          className="cursor-pointer group mb-8 flex items-center gap-2.5 px-4 py-2 
+             bg-white/40 backdrop-blur-md border border-slate-200/60 
+             rounded-full transition-all duration-300 
+             hover:bg-white hover:border-rose-200 hover:shadow-lg hover:shadow-rose-500/5 active:scale-95"
+        >
+          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 transition-colors group-hover:bg-rose-50">
+            <svg
+              className="w-3.5 h-3.5 text-slate-600 transition-transform group-hover:-translate-x-0.5 group-hover:text-rose-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={3}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 group-hover:text-slate-900">
+            Back
+          </span>
+        </button>
         <div className="flex items-center justify-center gap-3 mb-6 md:mb-10">
           <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Written by</span>
           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-rose-500">
@@ -69,11 +97,13 @@ const BlogDetailPage = observer(() => {
       </header>
 
       <div className="max-w-4xl mx-auto px-4 md:px-6 mb-16 md:mb-10">
-        {/* 1. The Media Box */}
-        <div className="aspect-video bg-[#F7F3ED] rounded-2xl md:rounded-3xl border border-slate-200/50 flex items-center justify-center overflow-hidden shadow-[inset_0_2px_10px_rgba(0,0,0,0.02)]">
-          <span className="text-slate-400 text-[10px] font-bold tracking-widest uppercase italic text-center px-4">
-            [ Featured Media Content ]
-          </span>
+        <div className="aspect-video relative bg-[#F7F3ED] rounded-2xl md:rounded-3xl border border-slate-200/50 overflow-hidden shadow-[inset_0_2px_10px_rgba(0,0,0,0.02)] group">
+          <img
+            src={`http://localhost:8080/images/${blog.imageUrl}`}
+            alt={blog.title || "Blog Post"}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
         </div>
 
         <div className="mt-8 flex flex-col md:flex-row items-center justify-center gap-4">
@@ -84,21 +114,32 @@ const BlogDetailPage = observer(() => {
               Was this helpful?
             </span>
 
-            <button className="cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-rose-50/50 transition-all duration-300 active:scale-95 border border-transparent hover:border-rose-100/50">
+            <button
+              onClick={() => handleFavorite(blog.id)}
+              className="group cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-rose-50/50 transition-all duration-300 active:scale-95"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                fill="none"
+                // 1. Toggle fill based on the boolean
+                fill={blog.likedByCurrentUser ? "currentColor" : "none"}
                 viewBox="0 0 24 24"
-                strokeWidth="2" /* Slightly bolder stroke for better visibility */
+                strokeWidth="2"
                 stroke="currentColor"
-                className="w-4 h-4 text-rose-400 group-hover:fill-rose-400 group-hover:text-rose-500 transition-all"
+                // 2. Add 'fill-rose-400' classes when true
+                className={`w-4 h-4 transition-all duration-300 ${blog.likedByCurrentUser
+                    ? "text-rose-500 fill-rose-500"
+                    : "text-rose-400 group-hover:text-rose-500"
+                  }`}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
+                />
               </svg>
 
-              {/* The Like Counter */}
               <span className="text-xs font-bold text-slate-500 tabular-nums">
-                12
+                {blog.favoriteCount}
               </span>
             </button>
           </div>

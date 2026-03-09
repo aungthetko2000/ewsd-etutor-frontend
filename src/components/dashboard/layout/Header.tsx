@@ -13,6 +13,7 @@ const Header = observer(
     ({
         name,
         onBlogClick,
+        onMenuClick
     }: {
         onMenuClick: () => void;
         name: string;
@@ -37,6 +38,15 @@ const Header = observer(
             userStore.state.setLastName(user.lastName);
             userStore.state.setEmail(user.email);
 
+            if (!user.previousLoginTime) {
+                userStore.state.setLastLoginTime(
+                    "Welcome to the eTutor! This is your first login.",
+                );
+            } else {
+                userStore.state.setLastLoginTime(
+                    "Your last login was on " + user.lastLoginTime,
+                );
+            }
             notificationStore.getAllNotification();
 
             const socket = new SockJS("http://localhost:8080/ws-stomp");
@@ -109,6 +119,14 @@ const Header = observer(
         return (
             <div>
                 <header className="h-20 bg-white/70 backdrop-blur-xl border-b border-slate-200/60 px-4 md:px-8 flex justify-between items-center sticky top-0 z-20">
+                    <button
+                        className="lg:hidden p-2 bg-white border border-slate-200 rounded-lg"
+                        onClick={onMenuClick} // This state is passed to SideBar as 'isOpen'
+                    >
+                        <svg className="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
                     <div className="flex items-center gap-4">
                         <ToastContainer />
                         <div className="flex flex-col gap-0.5">
@@ -123,20 +141,31 @@ const Header = observer(
                             </span>
                         </div>
                     </div>
+                    <div className="inline-flex items-center gap-2.5 px-4 py-2 group hover:border-orange-200 transition-all duration-300">
+                        {/* Animated Pulse Icon */}
+                        <div className="relative flex h-2.5 w-2.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span>
+                        </div>
 
+                        <div className="flex flex-col">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">
+                                Security Activity
+                            </span>
+                            <span className="text-sm font-bold text-slate-700 group-hover:text-orange-600 transition-colors">
+                                {userStore.state.lastLoginTime}
+                            </span>
+                        </div>
+                    </div>
                     <div className="flex items-center gap-4">
                         <PermissionGate permissions={["CREATE_BLOG"]}>
                             <button
                                 onClick={onBlogClick}
-                                className="cursor-pointer relative group flex items-center gap-2 px-6 py-2.5 
-                                    bg-gradient-to-r from-orange-500 to-rose-500 
-                                    text-white text-sm font-bold rounded-xl
-                                    shadow-[0_10px_20px_rgba(249,115,22,0.3)]
-                                    transition-all duration-300 ease-out"
+                                className="group cursor-pointer relative p-2.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-all duration-200 active:scale-95"
                             >
                                 {/* The Plus Icon - Made thicker and cleaner */}
                                 <svg
-                                    className="w-5 h-5 text-white transition-transform group-hover:rotate-90 duration-500"
+                                    className="w-6 h-6 transition-transform group-hover:rotate-[15deg]"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
@@ -144,12 +173,10 @@ const Header = observer(
                                     <path
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
-                                        strokeWidth={3}
-                                        d="M12 4v16m8-8H4"
+                                        strokeWidth={2}
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                                     />
                                 </svg>
-
-                                <span className="tracking-wide">Add New Blog</span>
                             </button>
                         </PermissionGate>
 

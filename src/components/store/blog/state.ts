@@ -7,6 +7,9 @@ export interface Blog {
     title: string,
     createdAt: string
     email: string
+    imageUrl: string
+    favoriteCount: number
+    likedByCurrentUser: boolean
 }
 
 export class BlogState {
@@ -18,6 +21,8 @@ export class BlogState {
     message: string = ""
     blogs: Blog [] = []
     blogDetail: Blog | undefined;
+    favoriteCount: number = 0;
+    favoriteBlogs: Blog [] = [];
 
     constructor() {
         makeAutoObservable(this);
@@ -49,6 +54,14 @@ export class BlogState {
 
     setBlogDetail(blog: Blog) {
         this.blogDetail = blog;
+    }
+
+    setFavoriteCount(count: number) {
+        this.favoriteCount = count;
+    }
+
+    setFavoriteBlogs(favoriteBlog: Blog[]) {
+        this.favoriteBlogs = favoriteBlog
     }
 
     reset() {

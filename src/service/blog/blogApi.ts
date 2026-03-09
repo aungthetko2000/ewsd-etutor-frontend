@@ -22,5 +22,13 @@ export const blogApi = {
 
     getAllBlogById: async (id: number) => {
         return api.get(`/blogs/${id}`);
+    },
+
+    increaseFavoriteCount: async (id: number) => {
+        return api.post(`/blogs/favorite/${id}`);
+    },
+
+    getMostFavoriteBlog: async () => {
+        return api.get("/blogs/paginate");
     }
 }

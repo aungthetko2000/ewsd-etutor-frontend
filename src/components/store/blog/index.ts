@@ -8,5 +8,7 @@ export const blogStore = {
     state,
     createBlog: action.createBlog,
     getAllBlog: action.getAllBlogs,
-    getBlogDetailById: action.getBlogById
+    getBlogDetailById: action.getBlogById,
+    increaseFavoriteBlog: action.increaseFavoriteBlog,
+    getMostFavoriteBlog: action.getMostFavoriteBlog
 }
