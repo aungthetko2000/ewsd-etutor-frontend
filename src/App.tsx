@@ -6,11 +6,14 @@ import LoginForm from "./components/LoginForm.tsx";
 import ProtectedRoute from './components/auth/ProtectedRoute.tsx';
 import Dashboard from './components/DashBoard.tsx';
 import BlogList from './components/blog/BlogList.tsx';
+import { ToastContainer } from 'react-toastify';
+import BlogDetailPage from './components/blog/BlogDetailPage.tsx';
 import MessengerWidget from './components/message/Message.tsx';
 
 function App() {
      return (
           <>
+          <ToastContainer position="top-right" autoClose={2000} />
                <AuthProvider>
                     <BrowserRouter>
                          <Routes>
@@ -25,7 +28,12 @@ function App() {
                                         <BlogList />
                                    </ProtectedRoute>
                               } />
-                         
+                              <Route path="/blogs/:id" element={
+                                   <ProtectedRoute>
+                                        <BlogDetailPage />
+                                   </ProtectedRoute>
+                              } />
+
                          </Routes>
                               <MessengerWidget />
                     </BrowserRouter>

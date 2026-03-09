@@ -15,10 +15,8 @@ export class StaffAction {
 
     bulkAllocateStudents = async (studentsId: number[], tutorId: number) => {
         const payload: TutorAllocationRequest = { studentsId, tutorId };
-
         try {
             this.state.loading = true;
-
             const res = await staffApi.bulkAllocateStudents(payload);
             this.state.setMessage(res.data.message);
 
