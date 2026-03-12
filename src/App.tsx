@@ -9,7 +9,8 @@ import BlogList from './components/blog/BlogList.tsx';
 import { ToastContainer } from 'react-toastify';
 import BlogDetailPage from './components/blog/BlogDetailPage.tsx';
 import MessengerWidget from './components/message/Message.tsx';
-
+import DocumentUpload from './components/document/DocumentUpload.tsx';
+import { StudentListUI } from './components/StudentListUI/StudentListUI.tsx';
 function App() {
      return (
           <>
@@ -33,8 +34,15 @@ function App() {
                                         <BlogDetailPage />
                                    </ProtectedRoute>
                               } />
-
-                         </Routes>
+                            <Route path="/document" element={<DocumentUpload />} />
+                            
+                            <Route path="/StudentListUI" element={
+                                   <ProtectedRoute>
+                                   <StudentListUI />
+                                   </ProtectedRoute>
+                              } />
+                              </Routes>
+                         
                               <MessengerWidget />
                     </BrowserRouter>
                </AuthProvider>

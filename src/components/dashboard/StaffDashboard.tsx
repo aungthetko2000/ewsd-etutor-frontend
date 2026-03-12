@@ -63,6 +63,7 @@ const StaffDashboard = () => {
         >
             {renderContent()}
         </DashboardLayout>
+        
     );
 };
 
