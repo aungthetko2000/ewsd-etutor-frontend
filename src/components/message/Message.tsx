@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../store/useStore";
 
 type ChatMessage = {
   senderEmail: string;
@@ -14,30 +16,33 @@ const SELECTED_RECEIVER_ID = 3;
 const sessionUser = JSON.parse(sessionStorage.getItem("user") || "{}");
 const currentUserEmail = sessionUser.email;
 
-export default function Message() {
+const Message = observer(() => {
   const [message, setMessage] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const stompClient = useRef<Client | null>(null);
+
+  const { messageStore } = useStore();
 
   useEffect(() => {
     const token = sessionStorage.getItem("accessToken");
+    const userInfo = sessionStorage.getItem("user");
+    if (!userInfo) return;
+    const user = JSON.parse(userInfo);
+
+    // 1. Fetch history only once
+    messageStore.getChatHistory(user.id, SELECTED_RECEIVER_ID);
+
     const socket = new SockJS("http://localhost:8080/ws-stomp");
     const client = new Client({
       webSocketFactory: () => socket,
-      connectHeaders: {
-        Authorization: `Bearer ${token}`,
-      },
+      connectHeaders: { Authorization: `Bearer ${token}` },
       onConnect: () => {
-        console.log("Connected to WebSocket");
-
+        // 2. Clear existing messages or handle duplication logic in the store
+        // Subscribing here...
         client.subscribe(`/user/queue/messages`, (payload) => {
           const receivedMsg: ChatMessage = JSON.parse(payload.body);
-          setMessages((prev) => [...prev, receivedMsg]);
+          messageStore.addMessage(receivedMsg);
         });
-      },
-      onStompError: (frame) => {
-        console.error("Broker reported error: " + frame.headers["message"]);
       },
     });
 
@@ -45,16 +50,20 @@ export default function Message() {
     stompClient.current = client;
 
     return () => {
-      if (stompClient.current) stompClient.current.deactivate();
+      // 3. Ensure the client is deactivated on cleanup
+      if (stompClient.current) {
+        console.log("Deactivating STOMP client...");
+        stompClient.current.deactivate();
+      }
+      messageStore.clearMessages();
     };
-  }, []);
+  }, [messageStore]); // Add dependency
 
   const handleSendMessage = () => {
     if (message.trim() && stompClient.current?.connected) {
-      // The keys MUST match your ChatMessageRequest Java class fields
       const payload = {
-        senderEmail: "mgmg@example.com",
-        receiverEmail: "aungaung@example.com", // This should come from your 'Selected User' state
+        senderEmail: currentUserEmail,
+        receiverEmail: "aungaung@example.com",
         content: message,
       };
 
@@ -160,7 +169,7 @@ export default function Message() {
         </header>
 
         <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar flex flex-col">
-          {messages.map((m, i) => {
+          {messageStore.state.messages.map((m, index) => {
             // Check if the message's sender email matches the logged-in user's email
             const isMe = m.senderEmail === currentUserEmail;
             const currentEmail = currentUserEmail?.trim().toLowerCase();
@@ -168,10 +177,13 @@ export default function Message() {
 
             const isMatch = currentEmail === senderEmail;
 
-            console.log(`Checking: "${currentEmail}" === "${senderEmail}"`, isMatch);
+            console.log(
+              `Checking: "${currentEmail}" === "${senderEmail}"`,
+              isMatch,
+            );
             return (
               <div
-                key={i}
+                key={m.timestamp || index}
                 className={`flex w-full ${isMe ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-2 duration-300`}
               >
                 <div
@@ -179,11 +191,10 @@ export default function Message() {
                 >
                   {/* Message Bubble */}
                   <div
-                    className={`relative p-4 rounded-3xl text-sm leading-relaxed shadow-sm ${
-                      isMe
+                    className={`relative p-4 rounded-3xl text-sm leading-relaxed shadow-sm ${isMe
                         ? "bg-gradient-to-tr from-orange-500 to-rose-600 text-white rounded-br-none"
                         : "bg-white text-gray-700 rounded-bl-none border border-gray-100"
-                    }`}
+                      }`}
                   >
                     <p>{m.content}</p>
 
@@ -217,11 +228,10 @@ export default function Message() {
             <button
               onClick={handleSendMessage}
               disabled={!message.trim()}
-              className={`absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-full transition-all duration-300 ${
-                message.trim()
+              className={`absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-full transition-all duration-300 ${message.trim()
                   ? "bg-orange-500 text-white scale-100"
                   : "bg-gray-50 text-gray-300 scale-90"
-              }`}
+                }`}
             >
               <svg
                 className="w-5 h-5 rotate-45"
@@ -242,4 +252,6 @@ export default function Message() {
       </main>
     </div>
   );
-}
+});
+
+export default Message;

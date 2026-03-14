@@ -5,6 +5,7 @@ import { staffStore } from './staff'
 import { meetingStore } from './meeting'
 import { notificationStore } from './notifiation'
 import { blogStore } from './blog'
+import { messageStore } from './chat'
 
 export class RootStore{
     tutorStore = tutorStore
@@ -14,6 +15,7 @@ export class RootStore{
     meetingStore = meetingStore
     notificationStore = notificationStore
     blogStore = blogStore
+    messageStore = messageStore
 }
 
 export const rootStore = new RootStore();

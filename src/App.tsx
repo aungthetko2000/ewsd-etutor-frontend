@@ -8,7 +8,6 @@ import Dashboard from './components/DashBoard.tsx';
 import BlogList from './components/blog/BlogList.tsx';
 import { ToastContainer } from 'react-toastify';
 import BlogDetailPage from './components/blog/BlogDetailPage.tsx';
-import MessengerWidget from './components/message/Message.tsx';
 import DocumentUpload from './components/document/DocumentUpload.tsx';
 import { StudentListUI } from './components/StudentListUI/StudentListUI.tsx';
 import Message from './components/message/Message.tsx';
@@ -41,7 +40,7 @@ function App() {
                                         <Message />
                                    </ProtectedRoute>
                               } />
-                         </Routes>
+
                             <Route path="/document" element={<DocumentUpload />} />
 
                             <Route path="/StudentListUI" element={
@@ -49,9 +48,7 @@ function App() {
                                    <StudentListUI />
                                    </ProtectedRoute>
                               } />
-                              </Routes>
-
-                              <MessengerWidget />
+                         </Routes>
                     </BrowserRouter>
                </AuthProvider>
           </>
