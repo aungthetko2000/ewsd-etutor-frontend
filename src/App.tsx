@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './App.css'
 import { AuthProvider } from './components/auth/AuthContext.tsx';
@@ -8,7 +7,7 @@ import Dashboard from './components/DashBoard.tsx';
 import BlogList from './components/blog/BlogList.tsx';
 import { ToastContainer } from 'react-toastify';
 import BlogDetailPage from './components/blog/BlogDetailPage.tsx';
-import MessengerWidget from './components/message/Message.tsx';
+import Message from './components/message/Message.tsx';
 
 function App() {
      return (
@@ -33,9 +32,12 @@ function App() {
                                         <BlogDetailPage />
                                    </ProtectedRoute>
                               } />
-
+                              <Route path="/message" element={
+                                   <ProtectedRoute>
+                                        <Message />
+                                   </ProtectedRoute>
+                              } />
                          </Routes>
-                              <MessengerWidget />
                     </BrowserRouter>
                </AuthProvider>
           </>

@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../store/useStore";
 import LoaderIcon from "../common/LoaderIcon";
 import { useNavigate } from "react-router-dom";
+import MessengerWidget from "../message/MessageWidget";
 
 const IconChevronLeft = () => (
     <svg
@@ -175,7 +176,7 @@ const BlogDashboard = observer(() => {
                                     >
                                         <div className="relative h-60 overflow-hidden bg-slate-50">
                                         <img
-                                            src={blog.imageUrl || `https://picsum.photos/seed/${blog.id}/800/600`}
+                                            src={`https://localhost:8080/images/${blog.imageUrl}`}
                                             alt={blog.title}
                                             className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000"
                                         />
@@ -236,6 +237,7 @@ const BlogDashboard = observer(() => {
                     ))}
                 </div>
             )}
+            <MessengerWidget />
         </div>
     );
 });
