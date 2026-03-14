@@ -140,7 +140,6 @@ export default function DocumentUpload() {
       </div>
 
       {/* File List */}
-
       <div className="mt-10 space-y-3">
 
         {files.map((file) => (
