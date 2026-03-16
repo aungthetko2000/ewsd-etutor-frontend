@@ -11,6 +11,7 @@ import BlogDetailPage from './components/blog/BlogDetailPage.tsx';
 import MessengerWidget from './components/message/Message.tsx';
 import DocumentUpload from './components/document/DocumentUpload.tsx';
 import { StudentListUI } from './components/StudentListUI/StudentListUI.tsx';
+import StudentRegistration from './components/studentregister/StudentRegistration.tsx';
 function App() {
      return (
           <>
@@ -43,7 +44,7 @@ function App() {
                               } />
                               </Routes>
                          
-                              <MessengerWidget />
+                              <StudentRegistration />
                     </BrowserRouter>
                </AuthProvider>
           </>
