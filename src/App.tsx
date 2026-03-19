@@ -12,6 +12,7 @@ import MessengerWidget from './components/message/Message.tsx';
 import DocumentUpload from './components/document/DocumentUpload.tsx';
 import { StudentListUI } from './components/StudentListUI/StudentListUI.tsx';
 import StudentRegistration from './components/studentregister/StudentRegistration.tsx';
+//import StudentRegistration from './components/studentregister/StudentRegistration.tsx';
 function App() {
      return (
           <>
@@ -42,9 +43,19 @@ function App() {
                                    <StudentListUI />
                                    </ProtectedRoute>
                               } />
+
+                               <Route path="/studentRegistration" element={
+                                   <ProtectedRoute>
+                                   <StudentRegistration />
+                                   </ProtectedRoute>
+                              } />
                               </Routes>
+                                  
+                           
+                        
                          
-                              <StudentRegistration />
+                              <MessengerWidget />
+                             
                     </BrowserRouter>
                </AuthProvider>
           </>
