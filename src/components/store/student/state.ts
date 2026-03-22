@@ -2,6 +2,7 @@ import { makeAutoObservable } from "mobx"
 
 export interface Student {
     id: number,
+    email: string,
     fullName: string,
 }
 

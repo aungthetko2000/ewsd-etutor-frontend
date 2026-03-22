@@ -1,14 +1,32 @@
 import { makeAutoObservable } from "mobx"
 
+export interface MessageContacts {
+    partnerName: string;
+    partnerId: number;
+    lastMessage: string;
+    timestamp?: string;
+    partnerFirstName: string;
+    partnerLastName: string;
+    partnerEmail: string;
+}
+
 export interface Message {
     senderEmail: string;
     receiverEmail: string;
     content: string;
-    timestamp?: string;
+    timestamp: string;
+}
+
+export interface Student {
+    id: number,
+    fullName: string,
+    email: string
 }
 
 export class MessageState {
     messages: Message[] = []
+    messageContacts: MessageContacts[] = [] 
+    students: Student[] = []
 
     constructor() {
         makeAutoObservable(this);
@@ -16,5 +34,13 @@ export class MessageState {
 
     setMessages(messages: Message[]) {
         this.messages = messages
+    }
+
+    setMessageContacts(messageContacts: MessageContacts[]) {
+        this.messageContacts = messageContacts
+    }
+
+    setStudents(students: Student[]) {
+        this.students = students
     }
 }

@@ -3,12 +3,14 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useStore } from "../store/useStore";
 import LoaderIcon from "../common/LoaderIcon";
-import { formatDate } from "../store/blog/functions";
+import { formatDate } from "../store/comment/function";
 
 const BlogDetailPage = observer(() => {
   const { id } = useParams();
   const { blogStore } = useStore();
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+
+  const { commentStore } = useStore();
 
   const navigate = useNavigate();
 
@@ -17,6 +19,10 @@ const BlogDetailPage = observer(() => {
       blogStore.getBlogDetailById(Number(id));
     }
   }, [id, blogStore]);
+
+  useEffect(() => {
+    commentStore.getAllComments(Number(id));
+  })
 
   const blog = blogStore.state.blogDetail;
 
@@ -28,6 +34,19 @@ const BlogDetailPage = observer(() => {
 
   const handleFavorite = (id: number) => {
     blogStore.increaseFavoriteBlog(id);
+  }
+
+  const handlePostComments = () => {
+    const userInfo = sessionStorage.getItem("user");
+    if (!userInfo) return;
+
+    const user = JSON.parse(userInfo);
+    const payload = {
+      description: commentStore.state.description,
+      authorId: user.id,
+      blogId: Number(id)
+    };
+    commentStore.postComments(payload);
   }
 
   return (
@@ -127,8 +146,8 @@ const BlogDetailPage = observer(() => {
                 stroke="currentColor"
                 // 2. Add 'fill-rose-400' classes when true
                 className={`w-4 h-4 transition-all duration-300 ${blog.likedByCurrentUser
-                    ? "text-rose-500 fill-rose-500"
-                    : "text-rose-400 group-hover:text-rose-500"
+                  ? "text-rose-500 fill-rose-500"
+                  : "text-rose-400 group-hover:text-rose-500"
                   }`}
               >
                 <path
@@ -179,7 +198,7 @@ const BlogDetailPage = observer(() => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
           </svg>
           <span className="text-[10px] md:text-xs uppercase tracking-widest">
-            12 {isCommentsOpen ? "Hide Discussion" : "Discussion"}
+            {commentStore.state.comments.length} {isCommentsOpen ? "Hide Discussion" : "Discussion"}
           </span>
         </button>
       </div>
@@ -219,88 +238,49 @@ const BlogDetailPage = observer(() => {
 
             <div className="mb-12">
               <textarea
+                value={commentStore.state.description}
+                onChange={(e) => {
+                  commentStore.state.setField("description", e.target.value);
+                }}
                 className="w-full bg-[#FDFBF7] rounded-2xl p-6 text-slate-800 focus:bg-white border-2 border-transparent focus:border-orange-100 focus:ring-4 focus:ring-orange-50/50 transition-all outline-none resize-none text-base shadow-inner"
                 placeholder="What are your thoughts?"
                 rows={4}
               />
               <div className="flex justify-center mt-6">
-                <button className="bg-gradient-to-r from-orange-400 to-rose-500 text-white px-10 py-3 rounded-2xl font-bold text-xs uppercase tracking-widest shadow-lg hover:brightness-110 transition-all">
+                <button
+                  onClick={() => handlePostComments()}
+                  className="bg-gradient-to-r from-orange-400 to-rose-500 text-white px-10 py-3 rounded-2xl font-bold text-xs uppercase tracking-widest shadow-lg hover:brightness-110 transition-all">
                   Post Comment
                 </button>
               </div>
             </div>
 
             <div className="space-y-10 max-w-xl mx-auto mb-5">
-              <div className="flex gap-4 items-start">
-                <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center font-bold text-rose-500 text-xs shadow-sm border border-orange-100/50 flex-shrink-0">
-                  U
+              {commentStore.state.comments.map((comment) => (
+                <div key={comment.id} className="flex gap-4 items-start">
+                  {/* Avatar remains the same */}
+                  <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center font-bold text-rose-500 text-xs shadow-sm border border-orange-100/50 flex-shrink-0">
+                    {comment.whoComment.charAt(0)}
+                  </div>
+
+                  <div className="flex-1 border-b border-orange-100/30 pb-4">
+                    {/* Header Row: Name on left, Date on right */}
+                    <div className="flex justify-between items-baseline mb-1">
+                      <p className="font-bold text-slate-900  text-sm">
+                        {comment.whoComment}
+                      </p>
+                      <p className="text-slate-400 text-[10px] uppercase tracking-wide font-sans not-italic">
+                        {formatDate(comment.timeStamp)}
+                      </p>
+                    </div>
+
+                    {/* Comment Body: Keeping your serif italic style */}
+                    <p className="text-slate-600 text-sm leading-relaxed font-serif italic">
+                      {comment.description}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="font-bold text-slate-900 text-sm">User_99</p>
-                  <p className="text-slate-500 text-[11px] mb-2 uppercase tracking-tighter">Verified Reader</p>
-                  <p className="text-slate-600 text-sm leading-relaxed font-serif italic">"The warm background makes reading so much more enjoyable at night."</p>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-10 max-w-xl mx-auto mb-5">
-              <div className="flex gap-4 items-start">
-                <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center font-bold text-rose-500 text-xs shadow-sm border border-orange-100/50 flex-shrink-0">
-                  U
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-slate-900 text-sm">User_99</p>
-                  <p className="text-slate-500 text-[11px] mb-2 uppercase tracking-tighter">Verified Reader</p>
-                  <p className="text-slate-600 text-sm leading-relaxed font-serif italic">"The warm background makes reading so much more enjoyable at night."</p>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-10 max-w-xl mx-auto mb-5">
-              <div className="flex gap-4 items-start">
-                <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center font-bold text-rose-500 text-xs shadow-sm border border-orange-100/50 flex-shrink-0">
-                  U
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-slate-900 text-sm">User_99</p>
-                  <p className="text-slate-500 text-[11px] mb-2 uppercase tracking-tighter">Verified Reader</p>
-                  <p className="text-slate-600 text-sm leading-relaxed font-serif italic">"The warm background makes reading so much more enjoyable at night."</p>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-10 max-w-xl mx-auto mb-5">
-              <div className="flex gap-4 items-start">
-                <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center font-bold text-rose-500 text-xs shadow-sm border border-orange-100/50 flex-shrink-0">
-                  U
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-slate-900 text-sm">User_99</p>
-                  <p className="text-slate-500 text-[11px] mb-2 uppercase tracking-tighter">Verified Reader</p>
-                  <p className="text-slate-600 text-sm leading-relaxed font-serif italic">"The warm background makes reading so much more enjoyable at night."</p>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-10 max-w-xl mx-auto mb-5">
-              <div className="flex gap-4 items-start">
-                <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center font-bold text-rose-500 text-xs shadow-sm border border-orange-100/50 flex-shrink-0">
-                  U
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-slate-900 text-sm">User_99</p>
-                  <p className="text-slate-500 text-[11px] mb-2 uppercase tracking-tighter">Verified Reader</p>
-                  <p className="text-slate-600 text-sm leading-relaxed font-serif italic">"The warm background makes reading so much more enjoyable at night."</p>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-10 max-w-xl mx-auto mb-5">
-              <div className="flex gap-4 items-start">
-                <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center font-bold text-rose-500 text-xs shadow-sm border border-orange-100/50 flex-shrink-0">
-                  U
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-slate-900 text-sm">User_99</p>
-                  <p className="text-slate-500 text-[11px] mb-2 uppercase tracking-tighter">Verified Reader</p>
-                  <p className="text-slate-600 text-sm leading-relaxed font-serif italic">"The warm background makes reading so much more enjoyable at night."</p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>

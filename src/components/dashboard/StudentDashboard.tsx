@@ -2,6 +2,7 @@ import { useState } from "react";
 import DashboardLayout from "./layout/DashboardLayout";
 import NewBlog from '../blog/NewBlog';
 import BlogDashboard from "../blog/BlogDashboard";
+import DocumentUpload from "../document/DocumentUpload";
 
 const IconDashboard = ({ className }: any) => (
     <svg
@@ -22,7 +23,8 @@ const StudentDashboard = () => {
     const [activeTab, setActiveTab] = useState("dashboard");
 
     const menu = [
-        { key: "dashboard", label: "Dashboard", icon: IconDashboard }
+        { key: "dashboard", label: "Dashboard", icon: IconDashboard },
+        { key: "document", label: "Documents", icon: IconDashboard },
     ];
 
     const [showNewBlog, setShowNewBlog] = useState(false);
@@ -31,8 +33,8 @@ const StudentDashboard = () => {
         switch (activeTab) {
             case "dashboard":
                 return <BlogDashboard />;
-            case "hello":
-                return <div>Hello World</div>;
+            case "document":
+                return <DocumentUpload />;
             default:
                 return;
         }

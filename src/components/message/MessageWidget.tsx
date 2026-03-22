@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useStore } from "../store/useStore";
 
 const Icon = {
     Message: ({ cls = "w-6 h-6" }) => (
@@ -57,7 +58,19 @@ export default function MessengerWidget() {
     const [messengerOpen, setMessengerOpen] = useState(false);
     const hasUnread = true;
 
+    const { messageStore } = useStore();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const userInfo = sessionStorage.getItem("user");
+        if (!userInfo) return;
+        const user = JSON.parse(userInfo);
+        messageStore.getChatContacts(user.id);
+    })
+
+    const handleContactClick = (partnerId: number) => {
+        navigate(`/messages/${partnerId}`);
+    };
 
     return (
         <>
@@ -65,9 +78,9 @@ export default function MessengerWidget() {
                 {/* ── Slide-up contact panel ───────────────────────────────────────────── */}
                 <div
                     className={`fixed bottom-24 right-6 z-[9999] w-[360px] max-w-[calc(100vw-3rem)] 
-            bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden 
-            transition-all duration-300 ease-in-out transform
-            ${panelOpen ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-10 opacity-0 scale-95 pointer-events-none'}`}
+                                bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden 
+                                transition-all duration-300 ease-in-out transform
+                                ${panelOpen ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-10 opacity-0 scale-95 pointer-events-none'}`}
                 >
                     {/* Panel Header */}
                     <div className="p-5 text-white" style={{ background: "linear-gradient(135deg,#f97316,#e11d48)" }}>
@@ -75,28 +88,39 @@ export default function MessengerWidget() {
                         <p className="text-xs opacity-90">How can we help you today?</p>
                     </div>
 
-                    {/* Panel Content (Placeholder for API integration) */}
-                    <div className="h-80 overflow-y-auto bg-gray-50 p-4 space-y-3">
-                        <div className="flex items-center p-3 bg-white rounded-xl shadow-sm border border-gray-100 animate-pulse">
-                            <div className="w-10 h-10 rounded-full bg-gray-200 mr-3" />
-                            <div className="flex-1 space-y-2">
-                                <div className="h-3 bg-gray-200 rounded w-1/3" />
-                                <div className="h-2 bg-gray-100 rounded w-1/2" />
+                    <div className="h-80 overflow-y-auto bg-gray-50 p-4">
+                        {messageStore.state.messageContacts.length > 0 ? (
+                            <div className="space-y-3">
+                                {messageStore.state.messageContacts.map((message) => (
+                                    <div
+                                    onClick={() => handleContactClick(message.partnerId)}
+                                        key={message.partnerId || message.partnerEmail} className="flex items-center p-3 bg-white rounded-xl shadow-sm border border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors">
+                                        {/* Example Content - Replace with real message data */}
+                                        <div className="w-10 h-10 rounded-full bg-orange-100 mr-3 flex items-center justify-center font-bold text-orange-600">
+                                            {message.partnerFirstName?.charAt(0) || "U"}
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="text-sm font-bold text-gray-800">{message.partnerFirstName} {message.partnerLastName}</div>
+                                            <div className="text-xs text-gray-500 truncate">{message.lastMessage}</div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                        </div>
-
-                        {/* This is where your Hello World or "No messages" state goes */}
-                        <div className="flex flex-col items-center justify-center h-full py-10 text-center">
-                            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-3">
-                                <Icon.Message cls="w-8 h-8 text-orange-500" />
+                        ) : (
+                            /* Empty State: Only shows if there are no messages */
+                            <div className="flex flex-col items-center justify-center h-full py-10 text-center">
+                                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-3">
+                                    {/* <Icon.Message className="w-8 h-8 text-orange-500" /> */}
+                                </div>
+                                <p className="text-gray-500 font-medium text-sm">No recent chats</p>
+                                <button
+                                    onClick={() => navigate('/message')}
+                                    className="mt-4 text-xs font-semibold text-rose-500 hover:text-rose-600 transition-colors"
+                                >
+                                    Start a conversation
+                                </button>
                             </div>
-                            <p className="text-gray-500 font-medium text-sm">No recent chats</p>
-                            <button 
-                                onClick={() => navigate('/message')}
-                                className="mt-4 text-xs font-semibold text-rose-500 hover:text-rose-600 transition-colors">
-                                Start a conversation
-                            </button>
-                        </div>
+                        )}
                     </div>
                 </div>
 

@@ -7,11 +7,40 @@ const action = new MessageAction(state);
 export const messageStore = {
     state,
     getChatHistory: action.getChathistory,
+    getChatContacts: action.getChatContacts,
+    getAllStudents: action.getAllStudents,
+
     addMessage(newMsg: Message) {
         return state.messages.push(newMsg);
     },
-    
+
     clearMessages() {
         this.state.messages = [];
+    },
+
+    clearStudents() {
+        this.state.students = [];
+    },
+    upsertContact(contact: any) {
+        const existing = this.state.messageContacts.find(
+            (c) => c.partnerId === contact.partnerId
+        );
+
+        if (existing) {
+            existing.lastMessage = contact.lastMessage;
+        } else {
+            this.state.messageContacts.unshift(contact);
+        }
+    },
+    updateLastMessage(email: string, content: string) {
+        const contact = this.state.messageContacts.find(c => c.partnerEmail === email);
+        if (contact) {
+            contact.lastMessage = content;
+            // Move to top of list
+            this.state.messageContacts = [
+                contact,
+                ...this.state.messageContacts.filter(c => c.partnerEmail !== email)
+            ];
+        }
     }
 }
