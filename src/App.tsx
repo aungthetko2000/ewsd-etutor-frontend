@@ -11,7 +11,7 @@ import BlogDetailPage from './components/blog/BlogDetailPage.tsx';
 import DocumentUpload from './components/document/DocumentUpload.tsx';
 import { StudentListUI } from './components/StudentListUI/StudentListUI.tsx';
 import Message from './components/message/Message.tsx';
-
+import StudentRegistration from './components/studentregister/StudentRegistration.tsx';
 function App() {
      return (
           <>
@@ -48,7 +48,15 @@ function App() {
                                    <StudentListUI />
                                    </ProtectedRoute>
                               } />
-                         </Routes>
+
+                               <Route path="/studentRegistration" element={
+                                   <ProtectedRoute>
+                                   <StudentRegistration />
+                                   </ProtectedRoute>
+                              } />
+                              </Routes>
+                              <MessengerWidget />
+
                     </BrowserRouter>
                </AuthProvider>
           </>
