@@ -87,6 +87,7 @@ export const StudentListUI: React.FC<StudentListProps> = ({ initialStudents = []
           />
         </div>
         
+        
         <div className="flex items-center gap-3 w-full md:w-auto">
           <div className="flex items-center gap-1 bg-slate-50 p-1 border border-slate-200 rounded-xl">
             <button 
