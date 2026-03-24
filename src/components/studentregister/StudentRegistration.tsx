@@ -13,6 +13,8 @@ import {
   X
 } from 'lucide-react';
 
+import { studentApi } from '../../service/student/StudentApi';
+
 // --- Types ---
 export interface RegistrationResponse {
   success: boolean;
@@ -101,8 +103,15 @@ export default function StudentRegistration() {
     setResponse(null);
 
     try {
-      // Mocking the API call for UI-only ticket
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Create student via API
+      await studentApi.registerStudent({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        age: new Date().getFullYear() - new Date(formData.dob).getFullYear(),
+        grade: formData.grade
+      });
       
       const successResponse: RegistrationResponse = {
         success: true,
