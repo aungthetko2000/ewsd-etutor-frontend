@@ -8,6 +8,7 @@ export interface MessageContacts {
     partnerFirstName: string;
     partnerLastName: string;
     partnerEmail: string;
+    unreadCount: number;
 }
 
 export interface Message {
@@ -27,6 +28,7 @@ export class MessageState {
     messages: Message[] = []
     messageContacts: MessageContacts[] = [] 
     students: Student[] = []
+    unReadCount: number = 0;
 
     constructor() {
         makeAutoObservable(this);
@@ -42,5 +44,9 @@ export class MessageState {
 
     setStudents(students: Student[]) {
         this.students = students
+    }
+
+    setUnReadCount(unReadCount: number) {
+        this.unReadCount = unReadCount;
     }
 }

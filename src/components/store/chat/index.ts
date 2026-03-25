@@ -9,6 +9,8 @@ export const messageStore = {
     getChatHistory: action.getChathistory,
     getChatContacts: action.getChatContacts,
     getAllStudents: action.getAllStudents,
+    getAllUnreadMessage: action.getAllUnreadMessageCount,
+    markAsRead: action.markAllMessageAsRead,
 
     addMessage(newMsg: Message) {
         return state.messages.push(newMsg);
@@ -42,5 +44,21 @@ export const messageStore = {
                 ...this.state.messageContacts.filter(c => c.partnerEmail !== email)
             ];
         }
+    },
+
+    setUnreadToZero(partnerId: number) {
+        this.state.messageContacts = this.state.messageContacts.map(c =>
+            c.partnerId === partnerId
+                ? { ...c, unreadCount: 0 }
+                : c
+        );
+    },
+
+    incrementUnread(partnerId: number) {
+        this.state.messageContacts = this.state.messageContacts.map(c =>
+            c.partnerId === partnerId
+                ? { ...c, unreadCount: (c.unreadCount || 0) + 1 }
+                : c
+        );
     }
 }

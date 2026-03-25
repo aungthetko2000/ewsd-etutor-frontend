@@ -24,10 +24,31 @@ export class MessageAction {
     getAllStudents = async (name: string) => {
         try {
             const response = await chatApi.getAllStudents(name);
-            console.log('All Students from db,', response.data.data);
             this.state.setStudents(response.data.data);
         } catch (error) {
             console.error("Failed to fetch unassigned students", error);
+        } finally {
+            console.log("Failed")
+        }
+    }
+
+    getAllUnreadMessageCount = async (receiverId: number, senderId: number) => {
+        try {
+            const response = await chatApi.getUnreadMessageCount(receiverId, senderId);
+            console.log('UnRead Count ', response.data.unreadCount);
+            this.state.setUnReadCount(response.data.unreadCount);
+        } catch (error) {
+            console
+        } finally {
+            console.log("Failed")
+        }
+    }
+
+    markAllMessageAsRead = async (receiverId: number, senderId: number) => {
+        try {
+            await chatApi.markMessageAsRead(receiverId, senderId);
+        } catch (error) {
+            console.log('Mark As Read Error', error)
         } finally {
             console.log("Failed")
         }

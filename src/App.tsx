@@ -12,11 +12,11 @@ import DocumentUpload from './components/document/DocumentUpload.tsx';
 import { StudentListUI } from './components/StudentListUI/StudentListUI.tsx';
 import Message from './components/message/Message.tsx';
 import StudentRegistration from './components/studentregister/StudentRegistration.tsx';
-import MessengerWidget from './components/message/MessageWidget.tsx';
+
 function App() {
      return (
           <>
-          <ToastContainer position="top-right" autoClose={2000} />
+               <ToastContainer position="top-right" autoClose={2000} />
                <AuthProvider>
                     <BrowserRouter>
                          <Routes>
@@ -42,21 +42,26 @@ function App() {
                                    </ProtectedRoute>
                               } />
 
-                            <Route path="/document" element={<DocumentUpload />} />
-
-                            <Route path="/StudentListUI" element={
+                              <Route path="/message/:partnerId" element={
                                    <ProtectedRoute>
-                                   <StudentListUI />
+                                        <Message />
                                    </ProtectedRoute>
                               } />
 
-                               <Route path="/studentRegistration" element={
+                              <Route path="/document" element={<DocumentUpload />} />
+
+                              <Route path="/StudentListUI" element={
                                    <ProtectedRoute>
-                                   <StudentRegistration />
+                                        <StudentListUI />
                                    </ProtectedRoute>
                               } />
-                              </Routes>
-                              <MessengerWidget />
+
+                              <Route path="/studentRegistration" element={
+                                   <ProtectedRoute>
+                                        <StudentRegistration />
+                                   </ProtectedRoute>
+                              } />
+                         </Routes>
                     </BrowserRouter>
                </AuthProvider>
           </>

@@ -4,7 +4,7 @@ import SockJS from "sockjs-client";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../store/useStore";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Search, Plus, Paperclip, Smile, ArrowLeft } from "lucide-react";
+import { Send, Search, Plus, ArrowLeft } from "lucide-react";
 import type { Student } from "../store/student/state";
 import { formatDate } from "../store/comment/function";
 import { useParams } from "react-router-dom";
@@ -23,27 +23,37 @@ const Message = observer(() => {
   const currentUserEmail = sessionUser.email;
 
   const { partnerId } = useParams();
-  
+
   useEffect(() => {
     const contacts = messageStore.state.messageContacts;
-    if (contacts.length > 0) {
-      const urlContact = contacts.find(c => String(c.partnerId) === String(partnerId));
-      if (urlContact) {
-        handleSelectContact(urlContact);
-      } else if (!selectedPartnerId) {
-        handleSelectContact(contacts[0]);
+
+    if (contacts.length === 0) return;
+
+    if (partnerId) {
+      const contact = contacts.find((c) => String(c.partnerId) === String(partnerId));
+      if (contact && selectedPartnerId !== contact.partnerId) {
+        handleSelectContact(contact);
+        return;
       }
     }
-  }, [messageStore.state.messageContacts]);
+    if (!partnerId && !selectedPartnerRef.current) {
+      handleSelectContact(contacts[0]);
+    }
+
+  }, [partnerId, messageStore.state.messageContacts]);
 
   useEffect(() => {
     selectedPartnerRef.current = selectedPartnerId;
   }, [selectedPartnerId]);
 
   const handleSelectContact = (contact: any) => {
+    if (selectedPartnerId === contact.partnerId) return;
     setSelectedPartnerId(contact.partnerId);
     setPartnerEmail(contact.partnerEmail);
     messageStore.getChatHistory(sessionUser.id, contact.partnerId);
+    messageStore.markAsRead(sessionUser.id, contact.partnerId);
+
+    messageStore.setUnreadToZero(contact.partnerId);
   };
 
   useEffect(() => {
@@ -70,15 +80,34 @@ const Message = observer(() => {
       onConnect: () => {
         client.subscribe(`/user/queue/messages`, (payload) => {
           const msg = JSON.parse(payload.body);
-          messageStore.addMessage(msg);
+
+          const isActiveChat = selectedPartnerRef.current === msg.senderId;
+          if (isActiveChat) {
+            messageStore.addMessage(msg);
+          }
+
+          const isFromMe = msg.senderEmail === currentUserEmail;
 
           const contactExists = messageStore.state.messageContacts.some(
-            (c) => c.partnerEmail === msg.senderEmail);
+            (c) => c.partnerEmail === msg.senderEmail
+          );
 
           if (!contactExists) {
             messageStore.getChatContacts(sessionUser.id);
-          } else {
-            messageStore.updateLastMessage(msg.senderEmail, msg.content);
+            return;
+          }
+
+          messageStore.updateLastMessage(msg.senderEmail, msg.content);
+
+          if (!isFromMe) {
+            const isActiveChat = selectedPartnerRef.current === msg.senderId;
+
+            if (isActiveChat) {
+              messageStore.markAsRead(sessionUser.id, msg.senderId);
+              messageStore.setUnreadToZero(msg.senderId);
+            } else {
+              messageStore.incrementUnread(msg.senderId);
+            }
           }
         });
       },
@@ -99,7 +128,12 @@ const Message = observer(() => {
         senderEmail: currentUserEmail,
         receiverEmail: partnerEmail,
         content: message,
+        timestamp: new Date().toISOString()
       };
+
+      messageStore.addMessage(payload);
+
+      messageStore.updateLastMessage(partnerEmail, message);
       stompClient.current.publish({ destination: "/app/chat.send", body: JSON.stringify(payload) });
       setMessage("");
     }
@@ -127,7 +161,8 @@ const Message = observer(() => {
         partnerName: student.fullName,
         partnerFirstName: "",
         lastMessage: "",
-        partnerLastName: ""
+        partnerLastName: "",
+        unreadCount: 0,
       });
     }
     messageStore.getChatHistory(sessionUser.id, student.id);
@@ -217,7 +252,7 @@ const Message = observer(() => {
                   </span>
                   <span className="text-[10px] font-semibold text-slate-400">10m</span>
                 </div>
-                <p className="text-xs text-slate-500 truncate mt-1 leading-relaxed">
+                <p className="text-xs truncate mt-1 leading-relaxed text-slate-500">
                   {contact.lastMessage || "Start a conversation..."}
                 </p>
               </div>
@@ -277,8 +312,8 @@ const Message = observer(() => {
                     >
                       {/* Message Bubble */}
                       <div className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-[14px] shadow-sm ${isMe
-                          ? "bg-gradient-to-br from-orange-500 to-rose-500 text-white rounded-tr-none"
-                          : "bg-white text-slate-700 rounded-tl-none border border-slate-100"
+                        ? "bg-gradient-to-br from-orange-500 to-rose-500 text-white rounded-tr-none"
+                        : "bg-white text-slate-700 rounded-tl-none border border-slate-100"
                         }`}>
                         <p className="leading-relaxed">{m.content}</p>
                       </div>

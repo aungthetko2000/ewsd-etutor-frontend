@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../store/useStore";
+import { observer } from "mobx-react-lite";
 
 const Icon = {
     Message: ({ cls = "w-6 h-6" }) => (
@@ -53,7 +54,7 @@ const Icon = {
     ),
 };
 
-export default function MessengerWidget() {
+const MessengeWidget = observer(() => {
     const [panelOpen, setPanelOpen] = useState(false);
     const [messengerOpen, setMessengerOpen] = useState(false);
     const hasUnread = true;
@@ -66,10 +67,11 @@ export default function MessengerWidget() {
         if (!userInfo) return;
         const user = JSON.parse(userInfo);
         messageStore.getChatContacts(user.id);
+        // messageStore.getAllUnreadMessage(user.id);
     })
 
     const handleContactClick = (partnerId: number) => {
-        navigate(`/messages/${partnerId}`);
+        navigate(`/message/${partnerId}`);
     };
 
     return (
@@ -93,7 +95,7 @@ export default function MessengerWidget() {
                             <div className="space-y-3">
                                 {messageStore.state.messageContacts.map((message) => (
                                     <div
-                                    onClick={() => handleContactClick(message.partnerId)}
+                                        onClick={() => handleContactClick(message.partnerId)}
                                         key={message.partnerId || message.partnerEmail} className="flex items-center p-3 bg-white rounded-xl shadow-sm border border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors">
                                         {/* Example Content - Replace with real message data */}
                                         <div className="w-10 h-10 rounded-full bg-orange-100 mr-3 flex items-center justify-center font-bold text-orange-600">
@@ -128,7 +130,7 @@ export default function MessengerWidget() {
                 {!messengerOpen && (
                     <div className="fixed bottom-6 right-6 z-[9998] flex items-center justify-center">
                         {/* ── Pulse Effect Layer ────────────────────────────────────────── */}
-                        {hasUnread && !panelOpen && (
+                        {messageStore.state.unReadCount > 0 && !panelOpen && (
                             <span className="absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75 animate-ping" />
                         )}
                         {/* ── Main FAB ──────────────────────────────────────────────────── */}
@@ -145,15 +147,11 @@ export default function MessengerWidget() {
                             )}
 
                             {/* ── Unread Badge Dot ────────────────────────────────────────── */}
-                            {hasUnread && !panelOpen && (
+                            {messageStore.state.unReadCount > 0 && !panelOpen && (
                                 <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center">
-                                    {/* The Ping / Pulse Effect behind the badge */}
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-
-                                    {/* The Actual Badge */}
                                     <span className="relative inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-white border-[1.5px] border-rose-500 shadow-sm">
                                         <span className="text-[10px] font-bold leading-none text-rose-600">
-                                            12
+                                            {messageStore.state.unReadCount}
                                         </span>
                                     </span>
                                 </span>
@@ -164,4 +162,6 @@ export default function MessengerWidget() {
             </div>
         </>
     );
-}
+})
+
+export default MessengeWidget;
