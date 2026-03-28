@@ -3,7 +3,7 @@ import { authService } from "./authService";
 import { notifyAuthUpdated } from "./authEvent";
 
 const api = axios.create({
-    baseURL: 'http://54.206.245.1:8080/api/v1',
+    baseURL: 'http://localhost:8080/api/v1',
     headers: {
         'Content-Type': 'application/json',
     },

@@ -1,19 +1,25 @@
-import { useEffect, useState } from 'react';
-import { observer } from 'mobx-react-lite';
-import { useStore } from '../store/useStore';
-import { formatDate } from '../store/blog/functions';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../store/useStore";
+import { formatDate } from "../store/blog/functions";
+import { useNavigate } from "react-router-dom";
 
 const BlogList = observer(() => {
   const { blogStore } = useStore();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [sortBy, setSortBy] = useState('latest');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [sortBy, setSortBy] = useState("latest");
 
-  const categories = ['All', 'Education', 'Tutor Tips', 'Student Life', 'Career'];
-  
+  const categories = [
+    "All",
+    "Education",
+    "Tutor Tips",
+    "Student Life",
+    "Career",
+  ];
+
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     blogStore.getAllBlog();
   }, [blogStore]);
@@ -24,8 +30,18 @@ const BlogList = observer(() => {
 
   // Icons
   const SearchIcon = () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    <svg
+      className="w-5 h-5"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+      />
     </svg>
   );
 
@@ -52,7 +68,11 @@ const BlogList = observer(() => {
       <header className="relative pt-10 pb-12 px-6">
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">
-            The <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-rose-500">Etutor</span> Blog
+            The{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-rose-500">
+              Etutor
+            </span>{" "}
+            Blog
           </h1>
         </div>
       </header>
@@ -60,7 +80,6 @@ const BlogList = observer(() => {
       {/* Navigation & Filters */}
       <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-100 py-4 px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6 items-center justify-between">
-
           {/* Categories */}
           <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar w-full md:w-auto">
             {categories.map((cat) => (
@@ -68,8 +87,8 @@ const BlogList = observer(() => {
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-5 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === cat
-                  ? 'bg-gradient-to-r from-orange-500 to-rose-500 text-white shadow-lg shadow-orange-200'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    ? "bg-gradient-to-r from-orange-500 to-rose-500 text-white shadow-lg shadow-orange-200"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                   }`}
               >
                 {cat}
@@ -107,8 +126,12 @@ const BlogList = observer(() => {
       <main className="max-w-6xl mx-auto px-6 py-12">
         {blogStore.state.blogs.length === 0 ? (
           <div className="text-center py-24">
-            <h3 className="text-xl font-bold text-slate-800">No articles yet</h3>
-            <p className="text-slate-500">Check back during the next sunrise!</p>
+            <h3 className="text-xl font-bold text-slate-800">
+              No articles yet
+            </h3>
+            <p className="text-slate-500">
+              Check back during the next sunrise!
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -119,7 +142,13 @@ const BlogList = observer(() => {
               >
                 {/* Visual Header */}
                 <div className="relative h-64 bg-slate-50 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-orange-400/20 to-rose-500/20 group-hover:scale-110 transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-orange-400/20 to-rose-500/20 group-hover:scale-110 transition-transform duration-700">
+                    <img
+                      src={`http://localhost:8080/images/${blog.imageUrl}`}
+                      alt={blog.title || "Blog Post"}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+                    />
+                  </div>
                   <div className="absolute bottom-4 left-4">
                     <span className="px-4 py-1.5 bg-white/90 backdrop-blur text-[11px] font-black uppercase tracking-widest text-rose-600 rounded-full shadow-sm">
                       {blog.authorName}
@@ -147,13 +176,17 @@ const BlogList = observer(() => {
                       <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-orange-500 to-rose-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
                         {blog.authorName.charAt(0)}
                       </div>
-                      <span className="text-sm font-bold text-slate-700">{blog.authorName}</span>
+                      <span className="text-sm font-bold text-slate-700">
+                        {blog.authorName}
+                      </span>
                     </div>
 
                     <button
                       onClick={() => handleBlogDetails(blog.id)}
-                      className="cursor-pointer flex items-center gap-2 font-black text-sm text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-rose-600 uppercase tracking-widest">
-                      Full Article <ArrowRightIcon className="text-orange-500" />
+                      className="cursor-pointer flex items-center gap-2 font-black text-sm text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-rose-600 uppercase tracking-widest"
+                    >
+                      Full Article{" "}
+                      <ArrowRightIcon className="text-orange-500" />
                     </button>
                   </div>
                 </div>

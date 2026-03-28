@@ -49,6 +49,7 @@ export class BlogAction {
         try {
             this.state.loading = true
             const response = await blogApi.getAllBlogById(id);
+            console.log('Detail', response.data.data);
             this.state.setBlogDetail(response.data.data);
             this.state.loading = false;
         } catch (err) {
