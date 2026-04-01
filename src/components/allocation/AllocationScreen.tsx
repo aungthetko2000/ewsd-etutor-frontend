@@ -7,6 +7,7 @@ const AllocationScreen = observer(() => {
 
     const { tutorStore, studentStore, staffStore } = useStore();
 
+    // --- STUDENT PAGINATION STATE ---
     const ITEMS_PER_PAGE = 8;
     const [currentPage, setCurrentPage] = useState(1);
     const students = studentStore.state.filterStudents ?? [];
@@ -14,6 +15,22 @@ const AllocationScreen = observer(() => {
     const paginatedStudents = students.slice(
         (currentPage - 1) * ITEMS_PER_PAGE,
         currentPage * ITEMS_PER_PAGE
+    );
+
+    // --- TUTOR PAGINATION & SEARCH STATE ---
+    const TUTORS_PER_PAGE = 4;
+    const [tutorCurrentPage, setTutorCurrentPage] = useState(1);
+    const [tutorSearchText, setTutorSearchText] = useState("");
+    
+    const filteredTutors = (tutorStore.state.tutors ?? []).filter(tutor => 
+        tutor.fullName.toLowerCase().includes(tutorSearchText.toLowerCase()) ||
+        tutor.expertise.toLowerCase().includes(tutorSearchText.toLowerCase())
+    );
+    
+    const tutorTotalPages = Math.ceil(filteredTutors.length / TUTORS_PER_PAGE);
+    const paginatedTutors = filteredTutors.slice(
+        (tutorCurrentPage - 1) * TUTORS_PER_PAGE,
+        tutorCurrentPage * TUTORS_PER_PAGE
     );
 
     useEffect(() => {
@@ -25,6 +42,11 @@ const AllocationScreen = observer(() => {
     useEffect(() => {
         setCurrentPage(1);
     }, [studentStore.state.searchText]);
+
+    // Reset tutor page when search changes
+    useEffect(() => {
+        setTutorCurrentPage(1);
+    }, [tutorSearchText]);
 
     const clearData = () => {
         tutorStore.state.clearSelectedTutor();
@@ -79,7 +101,6 @@ const AllocationScreen = observer(() => {
                 <div className="grid grid-cols-12 gap-8">
                     {/* --- COLUMN 1: STUDENT SELECTION --- */}
                     <div className="col-span-12 lg:col-span-4 flex flex-col h-[750px]">
-                        {/* ... (rest of your Column 1 code) */}
                         <div className="flex flex-col gap-4 mb-4 px-2">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
@@ -144,9 +165,6 @@ const AllocationScreen = observer(() => {
                                                 <h4 className="font-bold text-slate-800 text-sm truncate">
                                                     {student.fullName}
                                                 </h4>
-                                                {/* <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
-                                                    {student.subject}
-                                                </p> */}
                                             </div>
                                             {studentStore.state.selectedStudent?.includes(
                                                 student.id,
@@ -192,8 +210,8 @@ const AllocationScreen = observer(() => {
                                 </div>
                                 <button
                                     onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                                    disabled={currentPage === totalPages}
-                                    className="cursor-pointer p-2 hover:bg-slate-100 rounded-xl text-rose-400 transition-colors">
+                                    disabled={currentPage === totalPages || totalPages === 0}
+                                    className="cursor-pointer p-2 hover:bg-slate-100 rounded-xl text-rose-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                     <svg
                                         className="w-4 h-4"
                                         fill="none"
@@ -213,44 +231,128 @@ const AllocationScreen = observer(() => {
                     </div>
 
                     {/* --- COLUMN 2: TUTOR SELECTION --- */}
-                    <div className="col-span-12 lg:col-span-4 space-y-4">
-                        <div className="flex items-center gap-3 mb-2 px-2">
-                            <div className="w-10 h-10 rounded-2xl bg-white shadow-sm flex items-center justify-center text-orange-500 font-bold border border-slate-100">
-                                02
+                    <div className="col-span-12 lg:col-span-4 flex flex-col h-[750px]">
+                        <div className="flex flex-col gap-4 mb-4 px-2">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-2xl bg-white shadow-sm flex items-center justify-center text-orange-500 font-bold border border-slate-100">
+                                        02
+                                    </div>
+                                    <h2 className="text-sm font-black uppercase tracking-widest text-slate-500">
+                                        Expert Tutors
+                                    </h2>
+                                </div>
+                                <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-2 py-1 rounded-md">
+                                    Total: {filteredTutors.length}
+                                </span>
                             </div>
-                            <h2 className="text-sm font-black uppercase tracking-widest text-slate-500">
-                                Expert Tutors
-                            </h2>
+
+                            <div className="relative group">
+                                <svg
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-500 transition-colors"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                    />
+                                </svg>
+                                <input
+                                    type="text"
+                                    placeholder="Search tutor name or expertise..."
+                                    className="w-full bg-white border border-slate-200 rounded-2xl py-3 pl-11 pr-4 text-sm outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/5 transition-all shadow-sm"
+                                    onChange={(e) => setTutorSearchText(e.target.value)}
+                                    value={tutorSearchText}
+                                />
+                            </div>
                         </div>
 
-                        <div className="space-y-4">
-                            {tutorStore.state.tutors.map((tutor) => (
-                                <div
-                                    key={tutor.id}
-                                    onClick={() => tutorStore.state.selectTutor(tutor)}
-                                    className={`group p-6 rounded-[2.5rem] border-2 transition-all duration-500 cursor-pointer overflow-hidden relative ${tutorStore.state.selectedTutor?.id === tutor.id
-                                        ? "border-orange-500 bg-white shadow-2xl -translate-y-1"
-                                        : "border-white bg-white/40 hover:bg-white hover:border-orange-500"
-                                        }`}
-                                >
-                                    {tutorStore.state.selectedTutor?.id === tutor.id && (
-                                        <div className="absolute top-0 right-0 h-full w-2 bg-orange-500" />
-                                    )}
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div>
-                                            <h3 className="text-lg font-black text-slate-800 tracking-tight group-hover:text-orange-500 transition-colors">
-                                                {tutor.fullName}
-                                            </h3>
-                                            <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">
-                                                {tutor.expertise}
-                                            </p>
-                                            <p className="text-xs text-orange-400 mt-1 tracking-widest">
-                                                {tutor.email}
-                                            </p>
+                        <div className="flex-1 bg-white/60 backdrop-blur-sm border border-white rounded-[2.5rem] p-4 shadow-xl shadow-slate-200/50 overflow-hidden flex flex-col">
+                            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4">
+                                {paginatedTutors.map((tutor) => (
+                                    <div
+                                        key={tutor.id}
+                                        onClick={() => tutorStore.state.selectTutor(tutor)}
+                                        className={`group p-6 rounded-[2.5rem] border-2 transition-all duration-500 cursor-pointer overflow-hidden relative ${tutorStore.state.selectedTutor?.id === tutor.id
+                                            ? "border-orange-500 bg-white shadow-2xl -translate-y-1"
+                                            : "border-white bg-white/40 hover:bg-white hover:border-orange-500"
+                                            }`}
+                                    >
+                                        {tutorStore.state.selectedTutor?.id === tutor.id && (
+                                            <div className="absolute top-0 right-0 h-full w-2 bg-orange-500" />
+                                        )}
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div>
+                                                <h3 className="text-lg font-black text-slate-800 tracking-tight group-hover:text-orange-500 transition-colors">
+                                                    {tutor.fullName}
+                                                </h3>
+                                                <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">
+                                                    {tutor.expertise}
+                                                </p>
+                                                <p className="text-xs text-orange-400 mt-1 tracking-widest">
+                                                    {tutor.email}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
+                                ))}
+                            </div>
+
+                            <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+                                <button
+                                    onClick={() => setTutorCurrentPage((p) => Math.max(1, p - 1))} 
+                                    className="cursor-pointer p-2 hover:bg-slate-100 rounded-xl text-rose-400 transition-colors">
+                                    <svg
+                                        className="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M15 19l-7-7 7-7"
+                                        />
+                                    </svg>
+                                </button>
+                                <div className="flex gap-1">
+                                    {Array.from({ length: tutorTotalPages }, (_, i) => i + 1).map((page) => (
+                                        <button
+                                            key={page}
+                                            onClick={() => setTutorCurrentPage(page)}
+                                            className={`cursor-pointer w-8 h-8 text-[10px] font-black rounded-lg transition-all ${page === tutorCurrentPage
+                                                ? "bg-gradient-to-br from-orange-500 to-rose-500 text-white shadow-lg shadow-rose-200"
+                                                : "text-slate-400 hover:bg-slate-100"
+                                                }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
                                 </div>
-                            ))}
+                                <button
+                                    onClick={() => setTutorCurrentPage((p) => Math.min(tutorTotalPages, p + 1))}
+                                    disabled={tutorCurrentPage === tutorTotalPages || tutorTotalPages === 0}
+                                    className="cursor-pointer p-2 hover:bg-slate-100 rounded-xl text-rose-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <svg
+                                        className="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M9 5l7 7-7 7"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
