@@ -1,8 +1,31 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../store/useStore";
 import LoaderIcon from "../common/LoaderIcon";
 import { toast } from "react-toastify";
+import { 
+  Image as ImageIcon, 
+  X, 
+  Lightbulb, 
+  ArrowRight,
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough,
+  List,
+  ListOrdered,
+  Link as LinkIcon,
+  Quote,
+  Undo,
+  Redo,
+  ChevronDown,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Minimize,
+  Maximize,
+  Trash
+} from "lucide-react";
 
 interface NewBlogProps {
   show: boolean;
@@ -13,16 +36,119 @@ const NewBlog: React.FC<NewBlogProps> = observer(({ show, onClose }) => {
   const { blogStore } = useStore();
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const editorImageInputRef = useRef<HTMLInputElement | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
+
+  useEffect(() => {
+    if (contentRef.current && contentRef.current.innerHTML !== blogStore.state.content) {
+      contentRef.current.innerHTML = blogStore.state.content;
+    }
+  }, [blogStore.state.content]);
 
   if (!show) return null;
 
   const image = blogStore.state.image;
   const preview = image ? URL.createObjectURL(image) : null;
 
+  const [showHeadingMenu, setShowHeadingMenu] = useState(false);
+  const [urlPrompt, setUrlPrompt] = useState<{ isOpen: boolean, range: Range | null }>({ isOpen: false, range: null });
+  const [urlInput, setUrlInput] = useState("");
+  const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null);
+
+  const handleFormat = (e: React.MouseEvent, command: string, value?: string) => {
+    e.preventDefault();
+    document.execCommand(command, false, value || undefined);
+    if (contentRef.current) {
+      blogStore.state.setField("content", contentRef.current.innerHTML);
+    }
+  };
+
+  const openUrlPrompt = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const selection = window.getSelection();
+    const range = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+    setUrlPrompt({ isOpen: true, range });
+    setUrlInput("");
+  };
+
+  const applyUrl = () => {
+    if (urlInput) {
+      contentRef.current?.focus();
+      const selection = window.getSelection();
+      if (urlPrompt.range) {
+        selection?.removeAllRanges();
+        selection?.addRange(urlPrompt.range);
+      }
+      document.execCommand('createLink', false, urlInput);
+      
+      if (contentRef.current) {
+        blogStore.state.setField("content", contentRef.current.innerHTML);
+      }
+    }
+    setUrlPrompt({ isOpen: false, range: null });
+  };
+
+  const handleEditorImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Create a local object URL for the image to display it immediately
+    const imageUrl = URL.createObjectURL(file);
+    
+    contentRef.current?.focus();
+    document.execCommand('insertImage', false, imageUrl);
+    
+    if (contentRef.current) {
+      blogStore.state.setField("content", contentRef.current.innerHTML);
+    }
+    
+    // Reset the input so the same file can be uploaded again if needed
+    if (editorImageInputRef.current) {
+      editorImageInputRef.current.value = '';
+    }
+  };
+
+  const handleEditorClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'IMG') {
+      setSelectedImage(target as HTMLImageElement);
+    } else {
+      setSelectedImage(null);
+    }
+  };
+
+  const updateImageStyle = (e: React.MouseEvent, style: Partial<CSSStyleDeclaration>) => {
+    e.preventDefault();
+    if (!selectedImage) return;
+    Object.assign(selectedImage.style, style);
+    if (contentRef.current) {
+      blogStore.state.setField("content", contentRef.current.innerHTML);
+    }
+  };
+
+  const deleteImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!selectedImage) return;
+    selectedImage.remove();
+    setSelectedImage(null);
+    if (contentRef.current) {
+      blogStore.state.setField("content", contentRef.current.innerHTML);
+    }
+  };
+
+  const handleInput = () => {
+    if (contentRef.current) {
+      blogStore.state.setField("content", contentRef.current.innerHTML);
+      if (selectedImage && !contentRef.current.contains(selectedImage)) {
+        setSelectedImage(null);
+      }
+    }
+  };
+
   const handleSubmit = async () => {
     await blogStore.createBlog();
-    toast.success(blogStore.state.message, {
+    toast.success(blogStore.state.message || "Blog created successfully!", {
       hideProgressBar: true,
       style: {
         background: "linear-gradient(135deg, #fff7ed 0%, #fff1f2 100%)",
@@ -60,60 +186,48 @@ const NewBlog: React.FC<NewBlogProps> = observer(({ show, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/30 backdrop-blur-sm p-0 sm:p-4 lg:p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1e1b4b]/40 backdrop-blur-sm p-4 sm:p-6">
       {blogStore.state.loading && <LoaderIcon />}
-      <div
-        className="
-        w-full bg-white shadow-2xl border border-gray-100
-        rounded-t-3xl sm:rounded-3xl
-        sm:max-w-lg lg:max-w-2xl
-        max-h-[92vh] sm:max-h-[88vh]  
-        flex flex-col
-        overflow-hidden
-      "
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 sm:px-6 sm:py-4 shrink-0 border-b border-gray-100">
-          <div>
-            <h3 className="text-lg sm:text-xl font-bold text-gray-800">
+      <div className="w-full bg-white shadow-2xl rounded-3xl max-w-4xl max-h-[95vh] flex flex-col overflow-hidden relative">
+        
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-6 right-6 text-gray-400 hover:text-gray-700 transition-colors z-10"
+        >
+          <X size={24} />
+        </button>
+
+        <div className="flex-1 overflow-y-auto p-8 sm:p-10">
+          {/* Header */}
+          <div className="mb-8">
+            <h2 className="text-3xl font-extrabold text-[#1e1b4b] tracking-tight">
               Create New Blog
-            </h3>
-            <p className="text-xs text-gray-400 mt-0.5 hidden sm:block">
-              Fill in the details below to publish
+            </h2>
+            <p className="text-[#818cf8] mt-1 font-medium">
+              Share your ideas with the world
             </p>
           </div>
 
-          <button
-            onClick={onClose}
-            className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition"
-          >
-            ✕
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="px-5 sm:px-6 py-4 space-y-4">
+          {/* Top Section: Image & Title */}
+          <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-8 mb-8">
             {/* Image Upload */}
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-600">
-                Cover Image
-              </label>
-
               {preview ? (
-                <div className="relative rounded-2xl overflow-hidden border border-gray-200">
+                <div className="relative rounded-2xl overflow-hidden border-2 border-[#e0e7ff] h-[140px] group">
                   <img
                     src={preview}
                     alt="Cover"
-                    className="w-full h-40 object-cover"
+                    className="w-full h-full object-cover"
                   />
-
-                  <button
-                    onClick={removeImage}
-                    className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded"
-                  >
-                    Remove
-                  </button>
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button
+                      onClick={removeImage}
+                      className="bg-white text-red-500 text-sm font-bold px-4 py-2 rounded-lg shadow-lg hover:bg-red-50 transition-colors"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div
@@ -124,17 +238,17 @@ const NewBlog: React.FC<NewBlogProps> = observer(({ show, onClose }) => {
                   }}
                   onDragLeave={() => setDragging(false)}
                   onDrop={handleDrop}
-                  className={`flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed h-40 cursor-pointer transition ${dragging
-                    ? "border-orange-400 bg-orange-50"
-                    : "border-gray-200 bg-gray-50"
-                    }`}
+                  className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed h-[140px] cursor-pointer transition-all ${
+                    dragging
+                      ? "border-[#818cf8] bg-[#e0e7ff]/50"
+                      : "border-[#c7d2fe] bg-[#f8fafc] hover:bg-[#f1f5f9]"
+                  }`}
                 >
-                  <p className="text-sm text-gray-500">
-                    Drag & drop or click to upload
-                  </p>
+                  <ImageIcon size={32} className="text-[#818cf8] mb-3" strokeWidth={1.5} />
+                  <span className="font-bold text-[#1e1b4b] text-sm">Add Cover Image</span>
+                  <span className="text-xs text-[#818cf8] mt-1 font-medium">JPG, PNG up to 5MB</span>
                 </div>
               )}
-
               <input
                 ref={fileInputRef}
                 type="file"
@@ -145,51 +259,165 @@ const NewBlog: React.FC<NewBlogProps> = observer(({ show, onClose }) => {
             </div>
 
             {/* Title */}
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-600">
+            <div className="flex flex-col justify-center">
+              <label className="mb-3 block text-lg font-bold text-[#1e1b4b]">
                 Blog Title
               </label>
-
               <input
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-                placeholder="Getting Started with React Hooks"
+                className="w-full border border-[#e0e7ff] rounded-xl px-5 py-4 text-[#1e1b4b] font-medium placeholder-[#a5b4fc] focus:outline-none focus:ring-2 focus:ring-[#818cf8]/50 focus:border-[#818cf8] transition-all"
+                placeholder="Enter an engaging title..."
                 value={blogStore.state.title}
                 onChange={(e) =>
                   blogStore.state.setField("title", e.target.value)
                 }
               />
             </div>
+          </div>
 
-            {/* Content */}
-            <div>
-              <textarea
-                rows={3}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-                placeholder="Brief summary of your blog..."
-                value={blogStore.state.content}
-                onChange={(e) =>
-                  blogStore.state.setField("content", e.target.value)
-                }
+          {/* Content Section */}
+          <div className="flex flex-col">
+            <label className="mb-3 block text-lg font-bold text-[#1e1b4b]">
+              Content
+            </label>
+            <div className="relative border border-[#e0e7ff] rounded-xl overflow-hidden flex flex-col focus-within:ring-2 focus-within:ring-[#818cf8]/50 focus-within:border-[#818cf8] transition-all">
+              {/* Toolbar Mockup */}
+              <div className="bg-[#f8fafc] border-b border-[#e0e7ff] px-4 py-3 flex flex-wrap items-center justify-between gap-y-2">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+                  <div className="relative">
+                    <button 
+                      onClick={(e) => { e.preventDefault(); setShowHeadingMenu(!showHeadingMenu); }} 
+                      className="flex items-center gap-1 text-[#64748b] hover:text-[#1e1b4b] font-medium text-sm px-2 py-1 rounded hover:bg-[#e2e8f0] transition-colors"
+                    >
+                      Normal <ChevronDown size={16} />
+                    </button>
+                    {showHeadingMenu && (
+                      <div className="absolute top-full left-0 mt-1 bg-white border border-[#e0e7ff] rounded-lg shadow-lg py-1 z-50 w-32">
+                        <button onMouseDown={(e) => { handleFormat(e, 'formatBlock', 'P'); setShowHeadingMenu(false); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-[#f8fafc]">Normal</button>
+                        <button onMouseDown={(e) => { handleFormat(e, 'formatBlock', 'H1'); setShowHeadingMenu(false); }} className="block w-full text-left px-4 py-2 text-sm font-bold hover:bg-[#f8fafc]">Heading 1</button>
+                        <button onMouseDown={(e) => { handleFormat(e, 'formatBlock', 'H2'); setShowHeadingMenu(false); }} className="block w-full text-left px-4 py-2 text-sm font-bold hover:bg-[#f8fafc]">Heading 2</button>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="hidden sm:block w-px h-5 bg-[#cbd5e1]"></div>
+                  
+                  <div className="flex items-center gap-1">
+                    <button onMouseDown={(e) => handleFormat(e, 'bold')} className="p-1.5 text-[#64748b] hover:text-[#1e1b4b] hover:bg-[#e2e8f0] rounded transition-colors"><Bold size={18} /></button>
+                    <button onMouseDown={(e) => handleFormat(e, 'italic')} className="p-1.5 text-[#64748b] hover:text-[#1e1b4b] hover:bg-[#e2e8f0] rounded transition-colors"><Italic size={18} /></button>
+                    <button onMouseDown={(e) => handleFormat(e, 'underline')} className="p-1.5 text-[#64748b] hover:text-[#1e1b4b] hover:bg-[#e2e8f0] rounded transition-colors"><Underline size={18} /></button>
+                    <button onMouseDown={(e) => handleFormat(e, 'strikeThrough')} className="p-1.5 text-[#64748b] hover:text-[#1e1b4b] hover:bg-[#e2e8f0] rounded transition-colors"><Strikethrough size={18} /></button>
+                  </div>
+
+                  <div className="w-px h-5 bg-[#cbd5e1]"></div>
+
+                  <div className="flex items-center gap-1">
+                    <button onMouseDown={(e) => handleFormat(e, 'insertUnorderedList')} className="p-1.5 text-[#64748b] hover:text-[#1e1b4b] hover:bg-[#e2e8f0] rounded transition-colors"><List size={18} /></button>
+                    <button onMouseDown={(e) => handleFormat(e, 'insertOrderedList')} className="p-1.5 text-[#64748b] hover:text-[#1e1b4b] hover:bg-[#e2e8f0] rounded transition-colors"><ListOrdered size={18} /></button>
+                  </div>
+
+                  <div className="w-px h-5 bg-[#cbd5e1]"></div>
+
+                  <div className="flex items-center gap-1">
+                    <button onMouseDown={(e) => openUrlPrompt(e)} className="p-1.5 text-[#64748b] hover:text-[#1e1b4b] hover:bg-[#e2e8f0] rounded transition-colors"><LinkIcon size={18} /></button>
+                    <button onMouseDown={(e) => handleFormat(e, 'formatBlock', 'BLOCKQUOTE')} className="p-1.5 text-[#64748b] hover:text-[#1e1b4b] hover:bg-[#e2e8f0] rounded transition-colors"><Quote size={18} /></button>
+                    <button onMouseDown={(e) => { e.preventDefault(); editorImageInputRef.current?.click(); }} className="p-1.5 text-[#64748b] hover:text-[#1e1b4b] hover:bg-[#e2e8f0] rounded transition-colors"><ImageIcon size={18} /></button>
+                    <input
+                      ref={editorImageInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleEditorImageUpload}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1 ml-auto sm:ml-4">
+                  <button onMouseDown={(e) => handleFormat(e, 'undo')} className="p-1.5 text-[#94a3b8] hover:text-[#1e1b4b] hover:bg-[#e2e8f0] rounded transition-colors"><Undo size={18} /></button>
+                  <button onMouseDown={(e) => handleFormat(e, 'redo')} className="p-1.5 text-[#94a3b8] hover:text-[#1e1b4b] hover:bg-[#e2e8f0] rounded transition-colors"><Redo size={18} /></button>
+                </div>
+              </div>
+
+              {urlPrompt.isOpen && (
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-5 rounded-2xl shadow-2xl border border-[#e0e7ff] z-50 w-80">
+                  <h4 className="font-bold text-[#1e1b4b] mb-3">
+                    Insert Link
+                  </h4>
+                  <input 
+                    autoFocus
+                    type="text" 
+                    placeholder="https://example.com"
+                    className="w-full border border-[#e0e7ff] rounded-xl px-4 py-2.5 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-[#818cf8]/50 focus:border-[#818cf8] transition-all"
+                    value={urlInput}
+                    onChange={(e) => setUrlInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') applyUrl();
+                      if (e.key === 'Escape') setUrlPrompt({ ...urlPrompt, isOpen: false });
+                    }}
+                  />
+                  <div className="flex justify-end gap-2">
+                    <button 
+                      onClick={() => setUrlPrompt({ ...urlPrompt, isOpen: false })}
+                      className="px-4 py-2 text-sm font-bold text-[#64748b] hover:bg-[#f8fafc] rounded-xl transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      onClick={applyUrl}
+                      className="px-4 py-2 text-sm font-bold bg-[#818cf8] text-white rounded-xl hover:bg-[#6366f1] transition-colors shadow-lg shadow-[#818cf8]/20"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {selectedImage && (
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-[#1e1b4b] text-white px-3 py-2 rounded-xl shadow-2xl flex items-center gap-1 z-50 transition-all">
+                  <span className="text-xs font-bold mr-2 text-[#a5b4fc]">Image</span>
+                  <button onMouseDown={(e) => updateImageStyle(e, { display: 'inline', float: 'left', margin: '0 1rem 1rem 0' })} className="p-1.5 hover:bg-white/20 rounded transition-colors" title="Align Left"><AlignLeft size={16} /></button>
+                  <button onMouseDown={(e) => updateImageStyle(e, { display: 'block', float: 'none', margin: '0 auto 1rem auto' })} className="p-1.5 hover:bg-white/20 rounded transition-colors" title="Align Center"><AlignCenter size={16} /></button>
+                  <button onMouseDown={(e) => updateImageStyle(e, { display: 'inline', float: 'right', margin: '0 0 1rem 1rem' })} className="p-1.5 hover:bg-white/20 rounded transition-colors" title="Align Right"><AlignRight size={16} /></button>
+                  <div className="w-px h-4 bg-white/30 mx-1"></div>
+                  <button onMouseDown={(e) => updateImageStyle(e, { width: '50%', height: 'auto' })} className="p-1.5 hover:bg-white/20 rounded transition-colors" title="50% Width"><Minimize size={16} /></button>
+                  <button onMouseDown={(e) => updateImageStyle(e, { width: '100%', height: 'auto' })} className="p-1.5 hover:bg-white/20 rounded transition-colors" title="100% Width"><Maximize size={16} /></button>
+                  <div className="w-px h-4 bg-white/30 mx-1"></div>
+                  <button onMouseDown={deleteImage} className="p-1.5 hover:bg-red-500/80 text-red-300 hover:text-white rounded transition-colors" title="Delete Image"><Trash size={16} /></button>
+                </div>
+              )}
+
+              <div
+                ref={contentRef}
+                contentEditable
+                onInput={handleInput}
+                onClick={handleEditorClick}
+                className="w-full p-5 text-[#1e1b4b] font-medium focus:outline-none min-h-[200px] overflow-y-auto empty:before:content-[attr(data-placeholder)] empty:before:text-[#a5b4fc] [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-2 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-2 [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-2 [&_blockquote]:border-l-4 [&_blockquote]:border-[#818cf8] [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:mb-2 [&_a]:text-[#818cf8] [&_a]:underline [&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-2 [&_img]:cursor-pointer [&_img]:transition-all"
+                data-placeholder="Start writing your blog post here..."
               />
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="shrink-0 px-5 sm:px-6 py-4 border-t border-gray-100 bg-white">
-          <div className="flex justify-end gap-3">
+        <div className="shrink-0 px-8 py-6 border-t border-[#e0e7ff] bg-white flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-[#64748b] text-sm font-medium">
+            <Lightbulb size={20} className="text-[#818cf8]" />
+            <p>Tip: Write clear, engaging content to captivate your readers.</p>
+          </div>
+
+          <div className="flex items-center gap-4 w-full sm:w-auto">
             <button
               onClick={onClose}
-              className="px-5 rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-gray-500"
+              className="flex-1 sm:flex-none px-6 py-3 rounded-xl border border-[#e0e7ff] text-[#64748b] font-bold hover:bg-[#f8fafc] hover:text-[#1e1b4b] transition-colors"
             >
               Cancel
             </button>
 
             <button
               onClick={handleSubmit}
-              className="cursor-pointer bg-gradient-to-br from-orange-500 to-rose-500 px-6 rounded-xl bg-orange-500 py-2.5 text-sm font-bold text-white"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#ff512f] to-[#dd2476] text-white font-bold hover:opacity-90 transition-opacity shadow-lg shadow-pink-500/20"
             >
               Create Blog
+              <ArrowRight size={18} />
             </button>
           </div>
         </div>
