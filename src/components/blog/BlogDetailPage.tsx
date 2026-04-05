@@ -44,7 +44,8 @@ const BlogDetailPage = observer(() => {
     const payload = {
       description: commentStore.state.description,
       authorId: user.id,
-      blogId: Number(id)
+      blogId: Number(id),
+      submissionId: null
     };
     commentStore.postComments(payload);
   }

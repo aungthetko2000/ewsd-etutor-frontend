@@ -74,7 +74,7 @@ const AllocationScreen = observer(() => {
     }
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] p-8 font-sans">
+        <div className="min-h-screen bg-[#F8FAFC] p-8">
             {/* Header Section */}
             <header className="max-w-[1600px] mx-auto mb-10 flex justify-between items-end">
                 <div>

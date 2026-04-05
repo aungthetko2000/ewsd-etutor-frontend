@@ -2,6 +2,7 @@ import { useState } from "react";
 import CalendarSchedule from "../schedule/CalendarSchedule";
 import DashboardLayout from "./layout/DashboardLayout";
 import AssignedStudents from "../assignedStudent/AssignedStudents";
+import NewBlog from "../blog/NewBlog";
 const IconDashboard = ({ className }: any) => (
     <svg
         className={className}
@@ -37,14 +38,15 @@ const IconSchedule = ({ className }: any) => (
 
 const IconStudent = ({ className }: any) => (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </svg>
 );
 
 const TutorDashBoard = () => {
 
     const [activeTab, setActiveTab] = useState("dashboard");
+    const [showNewBlog, setShowNewBlog] = useState(false);
 
     const menu = [
         { key: "dashboard", label: "Dashboard", icon: IconDashboard },
@@ -66,14 +68,20 @@ const TutorDashBoard = () => {
     };
 
     return (
-        <DashboardLayout
-            menu={menu}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            name="Tutor Dashboard"
-        >
-            {renderContent()}
-        </DashboardLayout>
+        <>
+            <DashboardLayout
+                menu={menu}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                name="Tutor Dashboard"
+                 onBlogClick={() => setShowNewBlog(true)}
+            >
+                {renderContent()}
+            </DashboardLayout>
+            {showNewBlog && (
+                <NewBlog show={showNewBlog} onClose={() => setShowNewBlog(false)} />
+            )}
+        </>
     );
 };
 

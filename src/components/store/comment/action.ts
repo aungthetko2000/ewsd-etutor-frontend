@@ -11,26 +11,43 @@ export class CommentAction {
         makeAutoObservable(this);
     }
 
-    getAllComments = async (blogId: number) => {
+    getAllComments = async (id: number) => {
         try {
-            const response = await commentApi.getAllComments(blogId);
+            const response = await commentApi.getAllComments(id);
             this.state.setComments(response.data.data);
         } catch (err) {
             console.error(err);
             throw err;
         } finally {
-            console.error('finally')
+
+        }
+    };
+
+    getAllFeedBacks = async (id: number | null) => {
+        try {
+            const response = await commentApi.getAllFeedbacks(id);
+            this.state.setFeedBacks(response.data.data);
+        } catch (err) {
+            console.error(err);
+            throw err;
+        } finally {
         }
     };
 
     postComments = async (data: CommentRequest) => {
         try {
             const response = await commentApi.postComments(data);
-            this.state.setComments(response.data.data.description);
-            this.state.description = ''
+            const newComment = response.data.data;
+
+            if (data.submissionId) {
+                this.state.feedbacks.push(newComment);
+            } else if (data.blogId) {
+                this.state.comments.push(newComment);
+            }
+            this.state.description = '';
         } catch (err) {
             console.error(err);
             throw err;
         }
-    }
+    };
 }

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import DashboardLayout from "./layout/DashboardLayout";
 import AllocationScreen from "../allocation/AllocationScreen";
+import ExceptionReport from "../report/ExceptionReport";
 
 const IconDashboard = ({ className }: any) => (
     <svg
@@ -40,6 +41,7 @@ const StaffDashboard = () => {
 
     const menu = [
         { key: "dashboard", label: "Dashboard", icon: IconDashboard },
+         { key: "report", label: "Exception Report", icon: IconAllocation },
         { key: "allocation", label: "Allocation", icon: IconAllocation }
     ];
 
@@ -47,6 +49,8 @@ const StaffDashboard = () => {
         switch (activeTab) {
             case "dashboard":
                 return <div></div>;
+            case "report":
+                return <ExceptionReport />;
             case "allocation":
                 return <AllocationScreen />;
             default:

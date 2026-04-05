@@ -3,6 +3,7 @@ import type { FormEvent, ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./auth/AuthContext";
 import BackgroundIcon from "./BackgroundIcon";
+import logo from '../assets/images/logo.png';
 
 interface FormData {
   email: string;
@@ -98,26 +99,19 @@ function LoginForm() {
       <div className="relative w-full max-w-md">
         {/* Header Section */}
         <div className="text-center mb-10">
-          <div className="inline-flex bg-gradient-to-br from-orange-500 to-rose-500 items-center justify-center w-20 h-20 bg-white shadow-soft rounded-3xl mb-6 transition-transform hover:scale-105 duration-300">
-            <svg
-              className="w-10 h-10 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-              />
-            </svg>
+          {/* Increased container size and removed heavy padding */}
+          <div className="inline-flex items-center justify-center w-50 h-28 transition-transform hover:scale-110 duration-300">
+            <img
+              src={logo}
+              alt="Logo"
+              className="object-contain"
+            />
           </div>
 
           <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 mb-2">
             Welcome Back
           </h1>
-          <p className="text-gray-500 font-medium">
+          <p className="text-gray-500 font-medium text-lg">
             Continue your learning journey
           </p>
         </div>
@@ -143,11 +137,10 @@ function LoginForm() {
                 value={formData.email}
                 onChange={handleChange}
                 disabled={loading}
-                className={`w-full px-5 py-4 bg-gray-50/50 border-2 transition-all duration-200 outline-none rounded-2xl focus:bg-white ${
-                  errors.email
-                    ? "border-red-400"
-                    : "border-transparent focus:border-orange-400"
-                }`}
+                className={`w-full px-5 py-4 bg-gray-50/50 border-2 transition-all duration-200 outline-none rounded-2xl focus:bg-white ${errors.email
+                  ? "border-red-400"
+                  : "border-transparent focus:border-orange-400"
+                  }`}
               />
               {errors.email && (
                 <p className="text-xs text-red-500 mt-1 ml-1">{errors.email}</p>
@@ -175,11 +168,10 @@ function LoginForm() {
                   value={formData.password}
                   onChange={handleChange}
                   disabled={loading}
-                  className={`w-full px-5 py-4 bg-gray-50/50 border-2 transition-all duration-200 outline-none rounded-2xl focus:bg-white ${
-                    errors.password
-                      ? "border-red-400"
-                      : "border-transparent focus:border-orange-400"
-                  }`}
+                  className={`w-full px-5 py-4 bg-gray-50/50 border-2 transition-all duration-200 outline-none rounded-2xl focus:bg-white ${errors.password
+                    ? "border-red-400"
+                    : "border-transparent focus:border-orange-400"
+                    }`}
                 />
                 {errors.password && (
                   <p className="text-xs text-red-500 mt-1 ml-1">
