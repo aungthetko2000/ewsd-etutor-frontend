@@ -4,6 +4,7 @@ import { useStore } from "../store/useStore";
 import LoaderIcon from "../common/LoaderIcon";
 import { useNavigate } from "react-router-dom";
 import MessengerWidget from "../message/MessageWidget";
+import TodayMeeting from "../upcomingMeeting/TodayMeeting";
 
 const IconChevronLeft = () => (
     <svg
@@ -237,6 +238,11 @@ const BlogDashboard = observer(() => {
                     ))}
                 </div>
             )}
+            <div className="w-full flex justify-center">
+            <div className="w-full max-w-3xl">
+                <TodayMeeting />
+            </div>
+            </div>
             <MessengerWidget />
         </div>
     );

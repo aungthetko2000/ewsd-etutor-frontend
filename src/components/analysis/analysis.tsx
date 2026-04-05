@@ -31,8 +31,8 @@ const colors = [
   "#828f38",
   "#f87171",
   "#fbbf24",
-  "#34d399",
-  "#a78bfa",
+  "#2a5143",
+  "#402e78",
 ];
 
 const Analysis = () => {
