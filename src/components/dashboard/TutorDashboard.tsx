@@ -3,6 +3,9 @@ import CalendarSchedule from "../schedule/CalendarSchedule";
 import DashboardLayout from "./layout/DashboardLayout";
 import AssignedStudents from "../assignedStudent/AssignedStudents";
 import NewBlog from "../blog/NewBlog";
+import DocumentUpload from "../document/DocumentUpload";
+import UploadAssignment from "../assignment/UploadAssignment";
+import AssignedStudentList from "../students/AssignedStudentList";
 const IconDashboard = ({ className }: any) => (
     <svg
         className={className}
@@ -51,6 +54,7 @@ const TutorDashBoard = () => {
     const menu = [
         { key: "dashboard", label: "Dashboard", icon: IconDashboard },
         { key: "schedule", label: "Schedule", icon: IconSchedule },
+        { key: "document", label: "Schedule", icon: IconSchedule },
         { key: "assigned-students", label: "Students", icon: IconStudent }
     ];
 
@@ -60,8 +64,10 @@ const TutorDashBoard = () => {
                 return;
             case "schedule":
                 return <CalendarSchedule />;
+            case "document":
+                return <UploadAssignment />;
             case "assigned-students":
-                return <AssignedStudents />;
+                return <AssignedStudentList />;
             default:
                 return;
         }
