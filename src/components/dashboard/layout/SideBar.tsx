@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useStore } from "../../store/useStore";
     import logo from '../../../assets/images/logo.png'
 
 type MenuItem = {
@@ -30,6 +31,7 @@ const SideBar = ({
         sessionStorage.clear();
         navigate("/");
     };
+    const { userStore } = useStore();
 
     return (
         <>
@@ -114,6 +116,25 @@ const SideBar = ({
                         </button>
                     ))}
                 </nav>
+
+                {/* Security Activity (Mobile Only) */}
+                <div className="lg:hidden px-4 mb-4">
+                    <div className="flex items-start gap-2 p-3 rounded-lg bg-orange-50 border border-orange-100">
+                        <div className="relative flex h-2.5 w-2.5 mt-1">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span>
+                        </div>
+
+                        <div className="flex flex-col">
+                            <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest">
+                                Security Activity
+                            </span>
+                            <span className="text-xs text-slate-600 break-words leading-snug">
+                                {userStore.state.lastLoginTime}
+                            </span>
+                        </div>
+                    </div>
+                </div>
 
                 {/* Logout Button */}
                 <div className="p-4 mt-auto border-t border-slate-100">
