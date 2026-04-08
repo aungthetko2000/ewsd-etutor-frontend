@@ -65,7 +65,7 @@ const BlogDashboard = observer(() => {
     const blogs = blogStore.state.favoriteBlogs || [];
     const displayBlogs = blogs;
 
-    // Set to 3 per page as requested
+    // Set to 3 per page 
     const itemsPerPage = 3;
     const totalPages = Math.max(1, Math.ceil(displayBlogs.length / itemsPerPage));
 
@@ -177,7 +177,7 @@ const BlogDashboard = observer(() => {
                                     >
                                         <div className="relative h-60 overflow-hidden bg-slate-50">
                                         <img
-                                            src={`https://localhost:8080/images/${blog.imageUrl}`}
+                                            src={`http://localhost:8080/images/${blog.imageUrl}`}
                                             alt={blog.title}
                                             className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000"
                                         />
@@ -238,10 +238,8 @@ const BlogDashboard = observer(() => {
                     ))}
                 </div>
             )}
-            <div className="w-full flex justify-center">
-            <div className="w-full max-w-3xl">
+            <div className="flex">
                 <TodayMeeting />
-            </div>
             </div>
             <MessengerWidget />
         </div>
