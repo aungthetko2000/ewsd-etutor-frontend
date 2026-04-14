@@ -40,7 +40,7 @@ const Header = observer(
 
             if (!user.previousLoginTime) {
                 userStore.state.setLastLoginTime(
-                    "Welcome to the eTutor! This is your first login.",
+                    "Welcome to OwlStudy! This is your first login.",
                 );
             } else {
                 userStore.state.setLastLoginTime(
