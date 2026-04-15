@@ -109,7 +109,7 @@ function LoginForm() {
           </div>
 
           <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 mb-2">
-            Welcome Back
+            Welcome!
           </h1>
           <p className="text-gray-500 font-medium text-lg">
             Continue your learning journey
@@ -239,7 +239,7 @@ function LoginForm() {
         {/* Footer */}
         <div className="mt-10 text-center">
           <p className="mt-8 text-[10px] text-gray-400 uppercase tracking-[0.2em]">
-            &copy; 2026 E-Tutoring System &bull; Design v2.0
+            &copy; 2026 OwlStudy Academic &bull; All rights reserved
           </p>
         </div>
       </div>

@@ -93,7 +93,7 @@ const AddEventModal = observer(({ date, onClose }: AddModalProps) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/30 backdrop-blur-sm p-0 sm:p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-0 sm:p-4">
       {/* 1. Added max-h and overflow-y-auto to prevent the modal from disappearing behind the Mac notch/taskbar */}
       {meetingStore.state.loading && <LoaderIcon />}
       <div className="w-full sm:max-w-md max-h-[95vh] sm:max-h-[90vh] flex flex-col rounded-t-3xl sm:rounded-3xl border border-gray-100 bg-white shadow-2xl overflow-hidden">

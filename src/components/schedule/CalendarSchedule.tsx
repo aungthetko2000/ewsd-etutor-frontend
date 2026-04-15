@@ -34,12 +34,6 @@ const CalendarSchedule = observer(() => {
 
   const { meetingStore } = useStore();
 
-  useEffect(() => {
-    meetingStore.gtAllMeetingSchedule();
-    setCurrentYear(2026);
-    setCurrentMonth(2);
-  }, [])
-
   // Add session modal
   const [addModalDate, setAddModalDate] = useState<{ year: number; month: number; day: number } | null>(null);
   const [detailState, setDetailState] = useState<{ event: CalendarEvent; dateLabel: string; isPast: boolean } | null>(null);

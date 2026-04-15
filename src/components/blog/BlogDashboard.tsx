@@ -4,6 +4,7 @@ import { useStore } from "../store/useStore";
 import LoaderIcon from "../common/LoaderIcon";
 import { useNavigate } from "react-router-dom";
 import MessengerWidget from "../message/MessageWidget";
+import TodayMeeting from "../upcomingMeeting/TodayMeeting";
 
 const IconChevronLeft = () => (
     <svg
@@ -64,7 +65,7 @@ const BlogDashboard = observer(() => {
     const blogs = blogStore.state.favoriteBlogs || [];
     const displayBlogs = blogs;
 
-    // Set to 3 per page as requested
+    // Set to 3 per page 
     const itemsPerPage = 3;
     const totalPages = Math.max(1, Math.ceil(displayBlogs.length / itemsPerPage));
 
@@ -237,6 +238,9 @@ const BlogDashboard = observer(() => {
                     ))}
                 </div>
             )}
+            <div className="flex">
+                <TodayMeeting />
+            </div>
             <MessengerWidget />
         </div>
     );
