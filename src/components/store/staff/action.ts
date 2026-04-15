@@ -6,6 +6,7 @@ import {
 import type { StaffState } from "./state";
 
 export class StaffAction {
+
     private state: StaffState;
 
     constructor(state: StaffState) {
@@ -21,6 +22,19 @@ export class StaffAction {
             this.state.setMessage(res.data.message);
 
             return res;
+        } catch (err) {
+            console.error(err);
+            throw err;
+        } finally {
+            this.state.loading = false;
+        }
+    };
+
+    getAllAllocation = async () => {
+        try {
+            const res = await staffApi.getAllAllocationList();
+            this.state.setAllocatedList(res.data.data);
+            console.log('Allocated List', res.data.data);
         } catch (err) {
             console.error(err);
             throw err;

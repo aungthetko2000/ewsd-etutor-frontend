@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useStore } from "../store/useStore";
 import { observer } from "mobx-react-lite";
 import LoaderIcon from "../common/LoaderIcon";
+import type { TutorAllocation } from "../store/staff/state";
 
 const AllocationScreen = observer(() => {
 
@@ -21,12 +22,12 @@ const AllocationScreen = observer(() => {
     const TUTORS_PER_PAGE = 4;
     const [tutorCurrentPage, setTutorCurrentPage] = useState(1);
     const [tutorSearchText, setTutorSearchText] = useState("");
-    
-    const filteredTutors = (tutorStore.state.tutors ?? []).filter(tutor => 
+
+    const filteredTutors = (tutorStore.state.tutors ?? []).filter(tutor =>
         tutor.fullName.toLowerCase().includes(tutorSearchText.toLowerCase()) ||
         tutor.expertise.toLowerCase().includes(tutorSearchText.toLowerCase())
     );
-    
+
     const tutorTotalPages = Math.ceil(filteredTutors.length / TUTORS_PER_PAGE);
     const paginatedTutors = filteredTutors.slice(
         (tutorCurrentPage - 1) * TUTORS_PER_PAGE,
@@ -42,11 +43,14 @@ const AllocationScreen = observer(() => {
     useEffect(() => {
         setCurrentPage(1);
     }, [studentStore.state.searchText]);
-
-    // Reset tutor page when search changes
+    
     useEffect(() => {
         setTutorCurrentPage(1);
     }, [tutorSearchText]);
+
+    useEffect(() => {
+        staffStore.getAllAllocation();
+    }, [])
 
     const clearData = () => {
         tutorStore.state.clearSelectedTutor();
@@ -57,6 +61,19 @@ const AllocationScreen = observer(() => {
         studentStore.state.toggleStudent(id);
     };
 
+    const [selectedAllocation, setSelectedAllocation] = useState<TutorAllocation | null>(null);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+    const openRelocateDrawer = (allocate: TutorAllocation) => {
+        setSelectedAllocation(allocate);
+        setIsDrawerOpen(true);
+    };
+
+    const closeRelocateDrawer = () => {
+        setSelectedAllocation(null);
+        setIsDrawerOpen(false);
+    };
+
     const handleBulkAllocate = () => {
         const tutorId = tutorStore.state.selectedTutor?.id;
         const studentsId = studentStore.state.selectedStudent;
@@ -65,8 +82,16 @@ const AllocationScreen = observer(() => {
 
         staffStore.bulkAllocateStudents(studentsId, tutorId);
 
-        // Update Student List in state
         studentStore.state.removeStudentsByIds(studentsId);
+    };
+
+    const [selectedTutorId, setSelectedTutorId] = useState<number | null>(null);
+
+    const handleReallocate = async () => {
+        if (!selectedTutorId || !selectedAllocation) return;
+        await staffStore.bulkAllocateStudents([selectedAllocation.studentId], selectedTutorId);
+        await staffStore.getAllAllocation();
+        closeRelocateDrawer();
     };
 
     const handleOnChagne = (value: string) => {
@@ -178,7 +203,7 @@ const AllocationScreen = observer(() => {
 
                             <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
                                 <button
-                                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} 
+                                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                                     className="cursor-pointer p-2 hover:bg-slate-100 rounded-xl text-rose-400 transition-colors">
                                     <svg
                                         className="w-4 h-4"
@@ -304,7 +329,7 @@ const AllocationScreen = observer(() => {
 
                             <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
                                 <button
-                                    onClick={() => setTutorCurrentPage((p) => Math.max(1, p - 1))} 
+                                    onClick={() => setTutorCurrentPage((p) => Math.max(1, p - 1))}
                                     className="cursor-pointer p-2 hover:bg-slate-100 rounded-xl text-rose-400 transition-colors">
                                     <svg
                                         className="w-4 h-4"
@@ -483,6 +508,223 @@ const AllocationScreen = observer(() => {
                     </div>
                 </div>
             </div>
+            <div className="mt-10 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                <table className="min-w-full divide-y divide-gray-200">
+
+                    <thead className="bg-gray-50/50">
+                        <tr>
+                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                Student Details
+                            </th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                Student Email
+                            </th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                Tutor Details
+                            </th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                Tutor Email
+                            </th>
+                            <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                Relocate
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody className="divide-y divide-gray-200 bg-white">
+                        {staffStore.state.allocatedList.length === 0 ? (
+                            <tr>
+                                <td colSpan={5} className="px-6 py-10 text-center text-sm italic text-gray-400">
+                                    No allocations found at this time.
+                                </td>
+                            </tr>
+                        ) : (
+                            staffStore.state.allocatedList.map((allocate) => (
+                                <tr
+                                    key={allocate.studentId}
+                                    className="transition-colors duration-200 hover:bg-blue-50/30"
+                                >
+                                    {/* Student */}
+                                    <td className="px-6 py-4">
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-medium text-gray-900">
+                                                {allocate.studentName}
+                                            </span>
+                                            <span className="text-xs text-orange-600 font-mono">
+                                                ID: {allocate.studentId}
+                                            </span>
+                                        </div>
+                                    </td>
+
+                                    {/* Student Email */}
+                                    <td className="px-6 py-4 text-sm text-gray-600">
+                                        {allocate.studentEmail}
+                                    </td>
+
+                                    {/* Tutor */}
+                                    <td className="px-6 py-4">
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-medium text-gray-900">
+                                                {allocate.tutorName}
+                                            </span>
+                                            <span className="text-xs text-orange-600 font-mono">
+                                                ID: {allocate.tutorId}
+                                            </span>
+                                        </div>
+                                    </td>
+
+                                    {/* Tutor Email */}
+                                    <td className="px-6 py-4 text-sm text-gray-600">
+                                        {allocate.tutorEmail}
+                                    </td>
+
+                                    {/* Relocate Button */}
+                                    <td className="px-6 py-4 text-right">
+                                        <button
+                                            onClick={() => openRelocateDrawer(allocate)}
+                                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium
+                                    text-amber-700 bg-amber-50 border border-amber-200
+                                    hover:bg-amber-100 hover:text-amber-800 hover:shadow-sm
+                                    transition-all duration-200 active:scale-95"
+                                        >
+                                            Relocate
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+            {isDrawerOpen && selectedAllocation && (
+                <div className="fixed inset-0 z-50 flex justify-end">
+                    {/* Animated Backdrop with Blur */}
+                    <div
+                        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+                        onClick={closeRelocateDrawer}
+                    />
+
+                    <div className="relative w-full max-w-md bg-white h-full shadow-[-20px_0_50px_-15px_rgba(0,0,0,0.1)] flex flex-col animate-slide-in-right">
+
+                        {/* Header: Clean & Sophisticated */}
+                        <div className="px-8 pt-8 pb-6 flex justify-between items-start">
+                            <div>
+                                <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+                                    Reallocate Student
+                                </h2>
+                                <p className="text-sm text-slate-500 mt-1">Assign a new mentor to this profile</p>
+                            </div>
+
+                            <button
+                                onClick={closeRelocateDrawer}
+                                className="p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-600"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto px-8 py-2 space-y-8">
+
+                            {/* Visual Flow: From Student -> To Tutor */}
+                            <div className="relative space-y-4">
+                                {/* Student Card */}
+                                <div className="group relative rounded-2xl bg-slate-50 p-5 border border-slate-100">
+                                    <span className="absolute -top-3 left-4 px-2 bg-white text-[10px] font-bold uppercase tracking-wider text-amber-600 border border-blue-100 rounded">
+                                        Student Details
+                                    </span>
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-lg">
+                                            {selectedAllocation.studentName.charAt(0)}
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-slate-800 leading-none">
+                                                {selectedAllocation.studentName}
+                                            </p>
+                                            <p className="text-sm text-slate-500 mt-1">
+                                                {selectedAllocation.studentEmail}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Visual Connector Line */}
+                                <div className="absolute left-10 top-1/2 h-full w-0.5 bg-dashed bg-slate-200 -z-10" />
+
+                                {/* Current Tutor Card */}
+                                <div className="rounded-2xl bg-amber-50/50 p-5 border border-amber-100">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-10 w-10 rounded-xl bg-orange-500 flex items-center justify-center text-white">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] uppercase font-bold text-orange-600/70 tracking-widest">Current Tutor</p>
+                                            <p className="font-semibold text-slate-800">
+                                                {selectedAllocation.tutorName}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr className="border-slate-100" />
+
+                            {/* Input Section */}
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2 ml-1">
+                                        New Assignment
+                                    </label>
+                                    <div className="relative">
+                                        <select
+                                            onChange={(e) =>
+                                                setSelectedTutorId(Number(e.target.value))
+                                            }
+                                            className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none"
+                                        >
+                                            <option>Select a new tutor...</option>
+                                            {filteredTutors.map((tutor) => (
+                                                <option key={tutor.id} value={tutor.id}>
+                                                    {tutor.fullName}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-slate-400">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Sticky Footer with Glass Effect */}
+                        <div className="p-8 border-t border-slate-100 bg-white/80 backdrop-blur-md flex gap-4">
+                            <button
+                                onClick={closeRelocateDrawer}
+                                className="flex-1 px-6 py-3 rounded-xl border border-slate-200 font-semibold text-slate-600 hover:bg-slate-50 transition-all active:scale-95"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                onClick={handleReallocate}
+                                disabled={!selectedTutorId}
+                                className="flex-1 px-6 py-3 rounded-xl font-semibold text-white
+                bg-gradient-to-r from-orange-500 to-rose-500
+                disabled:opacity-50 disabled:cursor-not-allowed
+                hover:shadow-lg transition-all"
+                            >
+                                Confirm Change
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 });

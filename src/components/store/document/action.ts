@@ -52,6 +52,10 @@ export class DocumentAction {
         try {
             const response = await documentApi.getAllDocumentById(studentId);
             this.state.setIndividualSubmissions(response.data.data);
-        } catch { }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            
+        }
     };
 }

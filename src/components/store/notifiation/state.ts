@@ -1,5 +1,7 @@
 import { makeAutoObservable } from "mobx";
 
+export type NotificationType = "MEETING" | "COMMENT";
+
 export interface MeetingNotification {
     id: number;
     detailMessage: string;
@@ -9,6 +11,7 @@ export interface MeetingNotification {
     endTime: string;
     senderEmail: string;
     senderName: string;
+    type: NotificationType
 }
 
 export class NotificationState {

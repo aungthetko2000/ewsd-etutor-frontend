@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, Search, Plus, ArrowLeft } from "lucide-react";
 import type { Student } from "../store/student/state";
 import { formatDate } from "../store/comment/function";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 
 const Message = observer(() => {
   const { messageStore } = useStore();
@@ -24,23 +24,39 @@ const Message = observer(() => {
 
   const { partnerId } = useParams();
 
+  const location = useLocation();
+  const navState = location.state as any;
+
   useEffect(() => {
-    const contacts = messageStore.state.messageContacts;
-
-    if (contacts.length === 0) return;
-
-    if (partnerId) {
-      const contact = contacts.find((c) => String(c.partnerId) === String(partnerId));
-      if (contact && selectedPartnerId !== contact.partnerId) {
-        handleSelectContact(contact);
-        return;
-      }
+    if (navState?.partnerId) {
+      setSelectedPartnerId(navState.partnerId);
+      setPartnerEmail(navState.partnerEmail);
+      messageStore.getChatHistory(sessionUser.id, navState.partnerId);
     }
-    if (!partnerId && !selectedPartnerRef.current) {
-      handleSelectContact(contacts[0]);
-    }
+  }, []);
 
-  }, [partnerId, messageStore.state.messageContacts]);
+  useEffect(() => {
+    if (!partnerId) return;
+
+    const pid = Number(partnerId);
+
+    const target = messageStore.state.messageContacts.find(
+      (c) => c.partnerId === pid
+    );
+
+    if (target) {
+      handleSelectContact(target);
+    } else {
+      setSelectedPartnerId(pid);
+      messageStore.getChatHistory(sessionUser.id, pid);
+    }
+  }, [partnerId]);
+
+  useEffect(() => {
+    if (!partnerId && !selectedPartnerId && messageStore.state.messageContacts.length > 0) {
+      handleSelectContact(messageStore.state.messageContacts[0]);
+    }
+  }, [messageStore.state.messageContacts]);
 
   useEffect(() => {
     selectedPartnerRef.current = selectedPartnerId;
@@ -271,7 +287,7 @@ const Message = observer(() => {
             <header className="h-20 px-8 bg-white border-b border-slate-200 flex items-center justify-between z-10 shadow-sm">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold border border-slate-200">
-                  {partnerEmail.charAt(0).toUpperCase()}
+                  {partnerEmail ? partnerEmail.charAt(0).toUpperCase() : "U"}
                 </div>
                 <div>
                   <h3 className="text-[15px] font-bold text-slate-800">{partnerEmail}</h3>

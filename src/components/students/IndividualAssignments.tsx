@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
 import { useStore } from "../store/useStore";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     FileText,
     CheckCircle2,
@@ -10,16 +10,18 @@ import {
     SendHorizonal,
     CircleDot
 } from "lucide-react";
+import { useParams } from "react-router-dom";
 
-const AssignedStudentList = observer(() => {
+const IndividualAssignments = observer(() => {
     
     const { documentStore, commentStore } = useStore();
     const [activeId, setActiveId] = useState<number | null>(null);
     const [acceptedIds, setAcceptedIds] = useState<number[]>([]);
+    const { studentId } = useParams();
 
     useEffect(() => {
         commentStore.state.description = ""
-        documentStore.getDocumentsById(6);
+        documentStore.getDocumentsById(Number(studentId));
     }, [documentStore]);
 
     const activeFile = documentStore.state.individualSubmissions.find((f) => f.id === activeId);
@@ -208,8 +210,4 @@ const AssignedStudentList = observer(() => {
     );
 });
 
-export default AssignedStudentList;
-
-function renderAsync(blob: Blob, current: never) {
-    throw new Error("Function not implemented.");
-}
+export default IndividualAssignments;

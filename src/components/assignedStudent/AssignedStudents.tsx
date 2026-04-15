@@ -1,10 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { useAssignedStudents, type Student } from "./apiAssignedStudents";
+import { useNavigate } from "react-router-dom";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// HELPERS
-// ─────────────────────────────────────────────────────────────────────────────
 function getInitials(name: string) {
   if (!name?.trim()) return "?";
   return name
@@ -16,9 +14,6 @@ function getInitials(name: string) {
     .slice(0, 2);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ICONS
-// ─────────────────────────────────────────────────────────────────────────────
 function SearchIcon() {
   return (
     <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -35,32 +30,36 @@ function MessageIcon() {
   );
 }
 
-function CalendarIcon() {
+function DocumentIcon() {
   return (
     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-      <line x1="16" y1="2" x2="16" y2="6" />
-      <line x1="8" y1="2" x2="8" y2="6" />
-      <line x1="3" y1="10" x2="21" y2="10" />
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
+      <line x1="10" y1="9" x2="8" y2="9" />
     </svg>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// MAIN COMPONENT
-// ─────────────────────────────────────────────────────────────────────────────
 export default function AssignedStudents() {
   const { user } = useAuth();
   const { students, loading, error } = useAssignedStudents(user?.id ?? 0);
-  const [search, setSearch]           = useState("");
+  const [search, setSearch] = useState("");
   const [gradeFilter, setGradeFilter] = useState<string>("all");
-  const [filterOpen, setFilterOpen]   = useState(false);
-  const [page, setPage]               = useState(1);
-  const [sortKey, setSortKey]         = useState<keyof Student>("fullName");
-  const [sortDir, setSortDir]         = useState<"asc" | "desc">("asc");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [sortKey, setSortKey] = useState<keyof Student>("fullName");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const PAGE_SIZE = 8;
 
-  // Derive sorted unique grade list from live data
+
+  const navigate = useNavigate();
+
+  const handleAssignmentDetails = (studentId: number | undefined) => {
+    navigate(`/assignments/${studentId}`);
+  };
+
   const gradeOptions = useMemo(() => {
     const grades = Array.from(
       new Set(students.map((s) => s.grade).filter(Boolean) as string[])
@@ -73,6 +72,16 @@ export default function AssignedStudents() {
     });
     return grades;
   }, [students]);
+
+  const handleContactClick = (student: any) => {
+    navigate(`/message/${student.id}`, {
+      state: {
+        partnerId: student.id,
+        partnerEmail: student.email,
+        partnerName: student.fullName
+      }
+    });
+  };
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -115,13 +124,13 @@ export default function AssignedStudents() {
   }, [search, gradeFilter, students, sortKey, sortDir]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const columns: { key: keyof Student; label: string; sortable: boolean }[] = [
-    { key: "fullName", label: "Student", sortable: true  },
-    { key: "grade",    label: "Grade",   sortable: true  },
-    { key: "age",      label: "Age",     sortable: true  },
-    { key: "email",    label: "Email",   sortable: false },
+    { key: "fullName", label: "Student", sortable: true },
+    { key: "grade", label: "Grade", sortable: true },
+    { key: "age", label: "Age", sortable: true },
+    { key: "email", label: "Email", sortable: false },
   ];
 
   return (
@@ -135,8 +144,8 @@ export default function AssignedStudents() {
             <p className="text-sm text-gray-500 mt-0.5">Manage and track your assigned students</p>
           </div>
           <div className="bg-white rounded-2xl px-6 py-4 shadow-md text-right">
-            <p className="text-xs text-gray-600 tracking-wide">Total Students</p>
-            <p className="text-3xl font-extrabold text-rose-500">{students.length}</p>
+            <p className="text-xs text-gray-600 tracking-wide">Total Assigned Students</p>
+            <p className="text-3xl font-extrabold text-orange-500">{students.length}</p>
           </div>
         </div>
 
@@ -161,9 +170,8 @@ export default function AssignedStudents() {
           <div className="relative" data-filter-dropdown>
             <button
               onClick={() => setFilterOpen((o) => !o)}
-              className={`flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl shadow-sm text-sm font-medium transition-all hover:shadow-md ${
-                gradeFilter !== "all" ? "border border-orange-300 text-orange-600" : "text-gray-600"
-              }`}
+              className={`flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl shadow-sm text-sm font-medium transition-all hover:shadow-md ${gradeFilter !== "all" ? "border border-orange-300 text-orange-600" : "text-gray-600"
+                }`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
@@ -244,11 +252,11 @@ export default function AssignedStudents() {
               </p>
             </div>
 
-              <div
-                className="overflow-x-auto w-full touch-pan-x"
-                style={{ WebkitOverflowScrolling: "touch" }}
-              >
-                <table className="min-w-[900px] w-full text-sm">
+            <div
+              className="overflow-x-auto w-full touch-pan-x"
+              style={{ WebkitOverflowScrolling: "touch" }}
+            >
+              <table className="min-w-[900px] w-full text-sm">
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-100">
                     {/* # — always visible */}
@@ -273,7 +281,7 @@ export default function AssignedStudents() {
                   {paginated.length > 0 ? (
                     paginated.map((student, idx) => {
                       const initials = getInitials(student.fullName || "");
-                      const rowNum   = (page - 1) * PAGE_SIZE + idx + 1;
+                      const rowNum = (page - 1) * PAGE_SIZE + idx + 1;
                       return (
                         <tr key={student.id ?? idx} className="hover:bg-orange-50/40 transition-colors group">
 
@@ -311,18 +319,20 @@ export default function AssignedStudents() {
                           <td className="px-4 sm:px-6 py-4">
                             <div className="flex items-center gap-1.5 sm:gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                               <button
+                                onClick={() => handleContactClick(student)}
                                 title="Message"
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-white transition-transform hover:scale-110"
+                                className="cursor-pointer w-8 h-8 rounded-full flex items-center justify-center text-white transition-transform hover:scale-110"
                                 style={{ background: "linear-gradient(135deg,#f97316,#e11d48)", boxShadow: "0 2px 6px rgba(249,115,22,0.35)" }}
                               >
                                 <MessageIcon />
                               </button>
                               <button
+                                onClick={() => handleAssignmentDetails(student.id)}
                                 title="Schedule"
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-white transition-transform hover:scale-110"
+                                className="cursor-pointer w-8 h-8 rounded-full flex items-center justify-center text-white transition-transform hover:scale-110"
                                 style={{ background: "linear-gradient(135deg,#f97316,#e11d48)", boxShadow: "0 2px 6px rgba(249,115,22,0.35)" }}
                               >
-                                <CalendarIcon />
+                                <DocumentIcon />
                               </button>
                             </div>
                           </td>
@@ -340,7 +350,7 @@ export default function AssignedStudents() {
                   )}
                 </tbody>
               </table>
-            
+
             </div>
 
             {/* ── Pagination ── */}
@@ -361,9 +371,8 @@ export default function AssignedStudents() {
                     <button
                       key={p}
                       onClick={() => setPage(p)}
-                      className={`w-8 h-8 rounded-lg text-sm font-semibold transition-colors ${
-                        page === p ? "text-white shadow" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                      }`}
+                      className={`w-8 h-8 rounded-lg text-sm font-semibold transition-colors ${page === p ? "text-white shadow" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        }`}
                       style={page === p ? { background: "linear-gradient(135deg,#f97316,#e11d48)" } : {}}
                     >{p}</button>
                   ))}

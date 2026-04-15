@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../store/useStore";
 import { formatDate } from "../store/comment/function";
+import { toast } from "react-toastify";
 
 const DocumentUpload = observer(() => {
 
@@ -128,6 +129,19 @@ const DocumentUpload = observer(() => {
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (!file) return;
+                        const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+                        if (!isPdf) {
+                          toast.error("Only PDF files allowed", {
+                            style: {
+                              borderRadius: "12px",
+                              background: "#ef4444",
+                              color: "#fff",
+                              fontWeight: "600",
+                            },
+                          });
+                          e.target.value = "";
+                          return;
+                        }
                         assignmentStore.state.setFile(file);
                         documentStore.state.uploadingFile = {
                           name: file.name,

@@ -6,7 +6,12 @@ export interface TutorAllocationRequest {
 }
 
 export const staffApi = {
+
     bulkAllocateStudents: async (payload: TutorAllocationRequest) => {
         return api.post("/staffs/bulk-allocate", payload);
-    }
+    },
+    
+    getAllAllocationList: async () => {
+        return api.get("/staffs/allocations");
+    },
 }

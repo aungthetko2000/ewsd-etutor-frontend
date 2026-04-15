@@ -12,6 +12,7 @@ import DocumentUpload from './components/document/DocumentUpload.tsx';
 import { StudentListUI } from './components/StudentListUI/StudentListUI.tsx';
 import Message from './components/message/Message.tsx';
 import StudentRegistration from './components/studentregister/StudentRegistration.tsx';
+import IndividualAssignments from './components/students/IndividualAssignments.tsx';
 
 function App() {
      return (
@@ -59,6 +60,12 @@ function App() {
                               <Route path="/studentRegistration" element={
                                    <ProtectedRoute>
                                         <StudentRegistration />
+                                   </ProtectedRoute>
+                              } />
+
+                              <Route path="/assignments/:studentId" element={
+                                   <ProtectedRoute>
+                                        <IndividualAssignments />
                                    </ProtectedRoute>
                               } />
                          </Routes>

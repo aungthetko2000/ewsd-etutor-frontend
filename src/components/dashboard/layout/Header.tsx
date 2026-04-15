@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useStore } from "../../store/useStore";
 import { observer } from "mobx-react-lite";
 import SockJS from "sockjs-client";
@@ -25,8 +25,6 @@ const Header = observer(
         const [declineId, setDeclineId] = useState<number | null>(null);
         const [reasons, setReasons] = useState<Record<number, string>>({});
         const [errors, setErrors] = useState<Record<number, boolean>>({});
-
-        const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
         useEffect(() => {
             const userInfo = sessionStorage.getItem("user");
@@ -60,8 +58,8 @@ const Header = observer(
                     console.log("Connected!");
                     stompClient.subscribe("/user/queue/notifications", (message) => {
                         console.log("NOTIFICATION RECEIVED:", message.body);
-                        const newMeeting = JSON.parse(message.body);
-                        notificationStore.state.addNotification(newMeeting);
+                        const newNotification = JSON.parse(message.body);
+                        notificationStore.state.addNotification(newNotification);
                     });
                 },
                 onStompError: (frame) => {
@@ -87,7 +85,19 @@ const Header = observer(
                     meetingStatus: MeetingStatus.DECLINED,
                     reason: reasons[id],
                 });
-                toast.success("Meeting declined!");
+                toast.success("Meeting declined!", {
+                  hideProgressBar: true,
+                  style: {
+                    background: "linear-gradient(135deg, #fff7ed 0%, #fff1f2 100%)",
+                    color: "#9a3412",
+                    fontWeight: "700",
+                    fontSize: "14px",
+                    borderRadius: "16px",
+                    border: "1px solid #ffedd5",
+                    boxShadow: "0 10px 25px -5px rgba(249, 115, 22, 0.15)",
+                    padding: "16px"
+                  }
+                });
                 setDeclineId(null);
                 setReasons((prev) => ({ ...prev, [id]: "" }));
                 setErrors((prev) => ({ ...prev, [id]: false }));
@@ -101,19 +111,20 @@ const Header = observer(
             meetingStore.updateMeetingStatus(id, {
                 meetingStatus: MeetingStatus.CONFIRMED,
             });
-            toast.success("Meeting confirmed!");
+            toast.success("Meeting confirmed!", {
+                  hideProgressBar: true,
+                  style: {
+                    background: "linear-gradient(135deg, #fff7ed 0%, #fff1f2 100%)",
+                    color: "#9a3412",
+                    fontWeight: "700",
+                    fontSize: "14px",
+                    borderRadius: "16px",
+                    border: "1px solid #ffedd5",
+                    boxShadow: "0 10px 25px -5px rgba(249, 115, 22, 0.15)",
+                    padding: "16px"
+                  }
+                });
             notificationStore.handleNotification(id);
-        };
-
-        const handleMouseEnter = () => {
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
-            setShowNotif(true);
-        };
-
-        const handleMouseLeave = () => {
-            timeoutRef.current = setTimeout(() => {
-                setShowNotif(false);
-            }, 300);
         };
 
         return (
@@ -183,8 +194,6 @@ const Header = observer(
                         {/* --- Notifications Section --- */}
                         <div
                             className="relative"
-                            onMouseEnter={handleMouseEnter}
-                            onMouseLeave={handleMouseLeave}
                         >
                             <button
                                 onClick={() => setShowNotif(!showNotif)}
@@ -224,121 +233,117 @@ const Header = observer(
                                     <div className="absolute right-0 mt-3 w-80 bg-white shadow-2xl rounded-xl border border-slate-100 z-50 overflow-hidden animate-in fade-in zoom-in duration-200">
                                         <div className="p-4 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
                                             <h3 className="font-semibold text-slate-800">
-                                                Invitations
+                                                Notification
                                             </h3>
                                             <span className="text-[10px] bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-bold">
                                                 {notificationStore.state.notifications.length} New
                                             </span>
                                         </div>
-
                                         <div className="max-h-96 overflow-y-auto">
                                             {notificationStore.state.notifications.length === 0 ? (
                                                 <div className="p-8 text-center">
-                                                    <p className="text-slate-400 text-sm">
-                                                        All caught up!
-                                                    </p>
+                                                    <p className="text-slate-400 text-sm">All caught up!</p>
                                                 </div>
                                             ) : (
-                                                notificationStore.state.notifications.map((meet) => (
+                                                notificationStore.state.notifications.map((notif) => (
                                                     <div
-                                                        key={meet.id}
+                                                        key={notif.id}
                                                         className="p-4 border-b border-slate-50 hover:bg-slate-50/50 transition-colors"
                                                     >
+                                                        {/* Notification content */}
                                                         <div className="flex flex-col gap-2 p-3 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
                                                             <span className="text-sm font-semibold text-slate-900 leading-snug">
-                                                                {meet.detailMessage}
+                                                                {notif.detailMessage}
                                                             </span>
+
                                                             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-slate-600">
-                                                                <span className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md font-medium">
-                                                                    <svg
-                                                                        className="w-3.5 h-3.5"
-                                                                        fill="none"
-                                                                        stroke="currentColor"
-                                                                        strokeWidth="2"
-                                                                        viewBox="0 0 24 24"
-                                                                    >
-                                                                        <path
-                                                                            strokeLinecap="round"
-                                                                            strokeLinejoin="round"
-                                                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                                                        />
-                                                                    </svg>
-                                                                    {meet.scheduledAt} • {meet.startTime}
-                                                                </span>
+                                                                {/* Show scheduled time only if exists (mainly for meetings) */}
+                                                                {notif.scheduledAt && (
+                                                                    <span className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md font-medium">
+                                                                        <svg
+                                                                            className="w-3.5 h-3.5"
+                                                                            fill="none"
+                                                                            stroke="currentColor"
+                                                                            strokeWidth="2"
+                                                                            viewBox="0 0 24 24"
+                                                                        >
+                                                                            <path
+                                                                                strokeLinecap="round"
+                                                                                strokeLinejoin="round"
+                                                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                                            />
+                                                                        </svg>
+                                                                        {notif.scheduledAt} • {notif.startTime}
+                                                                    </span>
+                                                                )}
                                                                 <span className="flex items-center gap-1 text-slate-500">
-                                                                    <span className="font-medium text-slate-400">
-                                                                        From:
-                                                                    </span>
-                                                                    {meet.senderName}
+                                                                    <span className="font-medium text-slate-400">From:</span>{" "}
+                                                                    {notif.senderName}
                                                                     <span className="text-slate-300 mx-1">|</span>
-                                                                    <span className="italic">
-                                                                        {meet.senderEmail}
-                                                                    </span>
+                                                                    <span className="italic">{notif.senderEmail}</span>
                                                                 </span>
                                                             </div>
                                                         </div>
 
-                                                        <div className="flex gap-2 mt-3">
-                                                            <button
-                                                                onClick={() => handleMeetingConfirm(meet.id)}
-                                                                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold py-2 rounded-lg transition-colors shadow-sm shadow-orange-200"
-                                                            >
-                                                                Accept
-                                                            </button>
-                                                            <button
-                                                                onClick={() => setDeclineId(meet.id)}
-                                                                className="flex-1 border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold py-2 rounded-lg transition-colors"
-                                                            >
-                                                                Decline
-                                                            </button>
-                                                        </div>
-
-                                                        {declineId === meet.id && (
-                                                            <div
-                                                                className={`mt-3 p-2 bg-slate-50 rounded-lg animate-in slide-in-from-top-2 ${errors[meet.id] ? "border-rose-500 bg-rose-50 ring-2 ring-rose-100" : "border-gray-200 bg-gray-50"}`}
-                                                            >
-                                                                <textarea
-                                                                    className={`w-full text-xs p-2 border border-slate-200 rounded-md focus:ring-1 focus:ring-orange-500 outline-none resize-none ${errors[meet.id] ? "placeholder-rose-300" : "placeholder-gray-300"}`}
-                                                                    placeholder={
-                                                                        errors[meet.id]
-                                                                            ? "Reason is required"
-                                                                            : "Provide a reason"
-                                                                    }
-                                                                    rows={2}
-                                                                    value={reasons[meet.id] || ""}
-                                                                    onChange={(e) => {
-                                                                        setErrors((prev) => ({
-                                                                            ...prev,
-                                                                            [meet.id]: false,
-                                                                        }));
-                                                                        setReasons((prev) => ({
-                                                                            ...prev,
-                                                                            [meet.id]: e.target.value,
-                                                                        }));
-                                                                    }}
-                                                                />
-                                                                <div className="flex justify-end gap-2 mt-1">
+                                                        {/* Accept/Decline buttons — only for MEETING type */}
+                                                        {notif.type === "MEETING" && (
+                                                            <>
+                                                                <div className="flex gap-2 mt-3">
                                                                     <button
-                                                                        onClick={() => setDeclineId(null)}
-                                                                        className="text-[10px] text-slate-400 font-bold"
+                                                                        onClick={() => handleMeetingConfirm(notif.id)}
+                                                                        className="flex-1 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold py-2 rounded-lg transition-colors shadow-sm shadow-orange-200"
                                                                     >
-                                                                        Cancel
+                                                                        Accept
                                                                     </button>
                                                                     <button
-                                                                        onClick={() =>
-                                                                            handleMeetingDecline(meet.id)
-                                                                        }
-                                                                        className="text-[10px] text-rose-500 font-bold"
+                                                                        onClick={() => setDeclineId(notif.id)}
+                                                                        className="flex-1 border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold py-2 rounded-lg transition-colors"
                                                                     >
-                                                                        Confirm
+                                                                        Decline
                                                                     </button>
                                                                 </div>
-                                                            </div>
+
+                                                                {declineId === notif.id && (
+                                                                    <div
+                                                                        className={`mt-3 p-2 rounded-lg animate-in slide-in-from-top-2 ${errors[notif.id]
+                                                                                ? "border-rose-500 bg-rose-50 ring-2 ring-rose-100"
+                                                                                : "border-gray-200 bg-gray-50"
+                                                                            }`}
+                                                                    >
+                                                                        <textarea
+                                                                            className={`w-full text-xs p-2 border rounded-md focus:ring-1 focus:ring-orange-500 outline-none resize-none ${errors[notif.id] ? "placeholder-rose-300" : "placeholder-gray-300"
+                                                                                }`}
+                                                                            placeholder={errors[notif.id] ? "Reason is required" : "Provide a reason"}
+                                                                            rows={2}
+                                                                            value={reasons[notif.id] || ""}
+                                                                            onChange={(e) => {
+                                                                                setErrors((prev) => ({ ...prev, [notif.id]: false }));
+                                                                                setReasons((prev) => ({ ...prev, [notif.id]: e.target.value }));
+                                                                            }}
+                                                                        />
+                                                                        <div className="flex justify-end gap-2 mt-1">
+                                                                            <button
+                                                                                onClick={() => setDeclineId(null)}
+                                                                                className="text-[10px] text-slate-400 font-bold"
+                                                                            >
+                                                                                Cancel
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() => handleMeetingDecline(notif.id)}
+                                                                                className="text-[10px] text-rose-500 font-bold"
+                                                                            >
+                                                                                Confirm
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </>
                                                         )}
                                                     </div>
                                                 ))
                                             )}
                                         </div>
+
                                     </div>
                                 </>
                             )}
