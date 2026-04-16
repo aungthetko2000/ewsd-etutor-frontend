@@ -8,7 +8,7 @@ import {
   PointElement,
   LineElement,
   Tooltip,
-  Legend,
+  Legend
 } from "chart.js";
 import { Pie, Bar, Line } from "react-chartjs-2";
 import { getAnalyticsReport } from "./apiAnalysis";

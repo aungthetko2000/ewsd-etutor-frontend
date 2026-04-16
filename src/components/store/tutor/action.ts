@@ -17,4 +17,18 @@ export class TutorAction {
         this.state.loading = false;
         this.state.setTutors(response.data.data);
     }
+
+    getAssignedStudentsById = async () => {
+        try {
+            this.state.loading = true;
+            const response = await tutorApi.getAssignedStudents();
+            this.state.setAssignedStudents(response.data.data);
+            this.state.loading = false;
+        } catch (error) {
+            console.error(error);
+        } finally {
+            this.state.loading = false;
+        }
+        
+    }
 }

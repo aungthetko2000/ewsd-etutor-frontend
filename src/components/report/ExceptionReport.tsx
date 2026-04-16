@@ -3,6 +3,8 @@ import { useStore } from "../store/useStore";
 import { DataTable } from "../dataTable/DataTable";
 import { columns } from "../column/columns";
 import { useEffect } from "react";
+import PermissionGate from "../auth/PermissionGate";
+import { Bar, Line } from "react-chartjs-2";
 import LoaderIcon from "../common/LoaderIcon";
 
 const ExceptionReport = observer(() => {
@@ -10,200 +12,323 @@ const ExceptionReport = observer(() => {
     const { reportStore } = useStore();
 
     const handleGenerate = async () => {
-        reportStore.state.unAssignedStudent = []
+
+        reportStore.state.unAssignedStudent = [];
+        reportStore.state.averageTutorMessage = [];
+        reportStore.state.messageLastDays = [];
+
         const reportType = reportStore.state.reportType;
+
         if (reportType === "NON_ALLOCATED") {
             await reportStore.getUnassignedStudent();
             return;
         }
+
         if (reportType === "INACTIVE") {
             const range = reportStore.state.inactiveRange;
-            let days = 7;
-            if (range === "7_DAYS") days = 7;
-            if (range === "28_DAYS") days = 28;
+            let days = Number(range || 7);
+
             await reportStore.getInActiveReport(days);
+            return;
+        }
+
+        if (reportType === "AVERAGE") {
+            await reportStore.getAverageReport();
+            return;
+        }
+
+        if (reportType === "MESSAGE") {
+            await reportStore.getTotalMessageLast7Days();
             return;
         }
     };
 
-
     useEffect(() => {
-        reportStore.state.unAssignedStudent = []
-        reportStore.state.reportType = ''
-        reportStore.state.inactiveRange = ''
+        reportStore.state.unAssignedStudent = [];
+        reportStore.state.averageTutorMessage = [];
+        reportStore.state.messageLastDays = [];
+        reportStore.state.reportType = '';
+        reportStore.state.inactiveRange = '';
     }, [])
 
-    return (
-        <div className="p-8 max-w-7xl mx-auto space-y-8 min-h-screen bg-[#f8fafc]">
-            {/* Header Section */}
-            <div className="flex justify-between items-end">
-                <div>
-                    <h3 className="text-3xl font-black text-slate-900 tracking-tight">
-                        Exception Report
-                    </h3>
-                    <p className="text-slate-500 font-medium">System-wide student status monitoring</p>
-                </div>
-                <div className="hidden md:block text-right">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Last Updated</span>
-                    <p className="text-sm font-semibold text-slate-600">Just now</p>
-                </div>
-            </div>
+    const data = {
+        labels: reportStore.state.averageTutorMessage.map(
+            item => item.tutorName
+        ),
+        datasets: [
+            {
+                label: "Total Messages",
+                data: reportStore.state.averageTutorMessage.map(
+                    item => item.totalMessages
+                ),
+                borderWidth: 1
+            }
+        ]
+    };
 
-            {/* Filter Bar - Modern "Floating" Style */}
-            <div className="bg-white border border-slate-200/60 shadow-sm rounded-2xl p-2">
-                <div className="flex items-center gap-4 flex-wrap">
-                    <div className="flex-1 min-w-[200px] p-2">
+    const options = {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: "top" as const
+            },
+            title: {
+                display: true,
+                text: "Messages by Tutor"
+            }
+        }
+    };
+
+    const messageChartData = {
+        labels: reportStore.state.messageLastDays.map(item => item.day),
+        datasets: [
+            {
+                label: "Messages",
+                data: reportStore.state.messageLastDays.map(item => item.count),
+                borderColor: "#3b82f6",
+                backgroundColor: "rgba(59,130,246,0.15)",
+                tension: 0.35,
+                fill: true,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }
+        ]
+    };
+
+    const messageChartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1 }
+            }
+        }
+    };
+    return (
+        <div className="min-h-screen bg-[#f8fafc] p-4 md:p-8 space-y-6">
+            {/* Header Section: Improved spacing and typography */}
+            <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1">
+                    <div className="flex items-center gap-3">
+                        <div className="h-8 w-1 bg-orange-500 rounded-full" />
+                        <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+                            Exception Report
+                        </h1>
+                    </div>
+                    <p className="text-slate-500 font-medium pl-4">System-wide student status monitoring</p>
+                </div>
+
+                <div className="bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm self-start md:self-auto">
+                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">System Status</span>
+                    <div className="flex items-center gap-2">
+                        <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        <p className="text-sm font-bold text-slate-700">Live Updates</p>
+                    </div>
+                </div>
+            </header>
+
+            {/* Filter Bar: Enhanced Interaction */}
+            <section className="bg-white border border-slate-200/60 shadow-xl shadow-slate-200/40 rounded-3xl p-3">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+
+                    {/* Report Type Select */}
+                    <div className="md:col-span-1 group">
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-2">Report Category</label>
                         <select
                             value={reportStore.state.reportType}
                             onChange={(e) => {
                                 reportStore.state.setReportType(e.target.value);
                                 reportStore.state.setInActiveRange("");
                             }}
-                            className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-orange-500/20 transition-all cursor-pointer"
+                            className="w-full bg-slate-50 border-2 border-transparent focus:border-orange-500/20 focus:bg-white rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 transition-all cursor-pointer outline-none"
                         >
-                            <option value="">--- Select ---</option>
+                            <option value="">--- Select Type ---</option>
                             <option value="NON_ALLOCATED">Non-Allocated Students</option>
                             <option value="INACTIVE">Inactive Students</option>
+                            <PermissionGate permissions={["VIEW_STATISTICS_REPORT"]}>
+                                <option value="AVERAGE">Average Message By Tutor</option>
+                                <option value="MESSAGE">Total Message (7 Days)</option>
+                            </PermissionGate>
                         </select>
                     </div>
 
-                    {reportStore.state.reportType === "INACTIVE" && (
-                        <div className="flex-1 min-w-[180px] p-2 animate-in fade-in zoom-in-95 duration-300">
-                            <select
-                                value={reportStore.state.inactiveRange}
-                                onChange={(e) => reportStore.state.setInActiveRange(e.target.value)}
-                                className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-orange-500/20 transition-all cursor-pointer"
-                            >
-                                <option value="">--- Select ---</option>
-                                <option value="7">Last 7 Days</option>
-                                <option value="28">Last 28 Days</option>
-                            </select>
-                        </div>
-                    )}
+                    {/* Date Range Select (Conditional) */}
+                    <div className={`md:col-span-1 transition-all duration-500 ${reportStore.state.reportType === "INACTIVE" ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"}`}>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-2">Timeframe</label>
+                        <select
+                            value={reportStore.state.inactiveRange}
+                            onChange={(e) => reportStore.state.setInActiveRange(e.target.value)}
+                            className="w-full bg-slate-50 border-2 border-transparent focus:border-orange-500/20 focus:bg-white rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 transition-all cursor-pointer outline-none"
+                        >
+                            <option value="">--- Select Period ---</option>
+                            <option value="7">Last 7 Days</option>
+                            <option value="28">Last 28 Days</option>
+                        </select>
+                    </div>
 
-                    <div className="p-2">
+                    {/* Spacer for alignment */}
+                    <div className="hidden md:block md:col-span-1" />
+
+                    {/* Action Button */}
+                    <div className="flex items-end p-1">
                         <button
                             onClick={handleGenerate}
-                            disabled={
-                                !reportStore.state.reportType ||
-                                (reportStore.state.reportType === "INACTIVE" && !reportStore.state.inactiveRange)
-                            }
-                            className="h-[50px] px-8 rounded-xl font-bold text-sm transition-all duration-300 
-            /* Enabled State */
-            enabled:bg-gradient-to-br from-orange-500 to-rose-500 enabled:text-white enabled:shadow-lg enabled:shadow-orange-500/30 enabled:hover:bg-orange-600 enabled:active:scale-95
-            /* Disabled State */
-            disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed disabled:border disabled:border-slate-200"
+                            disabled={!reportStore.state.reportType || (reportStore.state.reportType === "INACTIVE" && !reportStore.state.inactiveRange)}
+                            className="w-full h-[52px] rounded-2xl font-black text-sm uppercase tracking-wider transition-all duration-300 
+                            enabled:bg-slate-900 enabled:text-white enabled:hover:bg-orange-600 enabled:hover:shadow-orange-200 enabled:shadow-lg
+                            disabled:bg-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed group"
                         >
-                            <div className="flex items-center gap-2">
-                                <span>Generate Report</span>
-                                {!reportStore.state.reportType && (
-                                    <svg className="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                    </svg>
-                                )}
-                            </div>
+                            <span className="flex items-center justify-center gap-2">
+                                Generate Analytics
+                                <svg className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${!reportStore.state.reportType && 'opacity-30'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
                         </button>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            {/* The Table Section */}
-            <div className="relative pt-4">
+            {/* Data Display Area */}
+            <main className="min-h-[400px]">
                 {reportStore.state.loading ? (
                     <LoaderIcon />
-                ) : reportStore.state.unAssignedStudent.length > 0 ? (
-                    <div className="bg-white rounded-[2rem] shadow-[0_20px_70px_-10px_rgba(0,0,0,0.05)] border border-slate-200/80 overflow-hidden">
+                ) : reportStore.state.reportType === "AVERAGE" ? (
 
-                        {/* Dark/Gradient Table Header Decoration */}
-                        <div className="bg-slate-900 px-8 py-6 flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-rose-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-orange-500/40">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    /* 2. Average Chart */
+                    reportStore.state.averageTutorMessage.length > 0 ? (
+                        <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <div className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100">
+                                <div className="flex items-center gap-3 mb-8">
+                                    <div className="w-10 h-10 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center">
+                                        <svg
+                                            className="w-5 h-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2.5"
+                                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                                            />
+                                        </svg>
+                                    </div>
+
+                                    <h3 className="text-xl font-black text-slate-800">
+                                        Tutor Engagement Analytics
+                                    </h3>
                                 </div>
-                                <div>
-                                    <h4 className="text-white font-bold text-lg leading-tight">Student Data Log</h4>
-                                    <p className="text-slate-400 text-xs font-medium uppercase tracking-tighter">Verified Directory</p>
+
+                                <div className="h-[450px]">
+                                    <Bar data={data} options={options} />
                                 </div>
                             </div>
+                        </section>
+                    ) : (
+                        <div />
+                    )
 
-                            <button className="bg-white/20 hover:bg-amber-500 cursor-pointer text-white text-[10px] font-black px-4 py-2 rounded-lg transition-colors border border-white/10 tracking-widest">
-                                EXPORT AS CSV
+                ) : reportStore.state.reportType === "MESSAGE" ? (
+
+                    /* 3. Message Line Chart */
+                    reportStore.state.messageLastDays.length > 0 ? (
+                        <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <div className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100">
+                                <div className="flex items-center gap-3 mb-8">
+                                    <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+                                        <svg
+                                            className="w-5 h-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2.5"
+                                                d="M3 17l6-6 4 4 8-8"
+                                            />
+                                        </svg>
+                                    </div>
+
+                                    <div>
+                                        <h3 className="text-xl font-black text-slate-800">
+                                            Message Activity Trend
+                                        </h3>
+                                        <p className="text-sm text-slate-400">
+                                            Last 7 days communication volume
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="h-[420px]">
+                                    <Line
+                                        data={messageChartData}
+                                        options={messageChartOptions}
+                                    />
+                                </div>
+                            </div>
+                        </section>
+                    ) : (
+                        <div />
+                    )
+
+                ) : reportStore.state.unAssignedStudent.length > 0 ? (
+
+                    /* 4. Table Report */
+                    <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-200/80 overflow-hidden transition-all">
+                        <div className="bg-slate-900 px-8 py-7 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-rose-500 rounded-xl flex items-center justify-center text-white shadow-lg">
+                                    <svg
+                                        className="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2.5"
+                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                                        />
+                                    </svg>
+                                </div>
+
+                                <h4 className="text-white font-bold text-lg">
+                                    Student Status Report
+                                </h4>
+                            </div>
+
+                            <button className="bg-white/10 hover:bg-orange-500 text-white text-[10px] font-black px-4 py-2 rounded-lg transition-all border border-white/10 tracking-widest uppercase">
+                                Export CSV
                             </button>
                         </div>
 
-                        <div className="p-4 overflow-x-auto">
-                            <style>{`
-                            /* Targeting the inner DataTable if it allows CSS overrides */
-                            .rdt_TableHeadRow {
-                                background-color: #f1f5f9 !important; /* Soft Slate Header */
-                                color: #475569 !important;
-                                font-weight: 800 !important;
-                                text-transform: uppercase !important;
-                                letter-spacing: 0.05em !important;
-                                border-bottom: 2px solid #e2e8f0 !important;
-                                font-size: 11px !important;
-                            }
-                            .rdt_TableRow {
-                                border-bottom: 1px solid #f1f5f9 !important;
-                                color: #1e293b !important;
-                                transition: all 0.2s ease !important;
-                            }
-                            .rdt_TableRow:hover {
-                                background-color: #fff7ed !important; /* Soft Orange Hover */
-                                transform: scale(1.002);
-                            }
-                        `}</style>
+                        <div className="p-2">
                             <DataTable
                                 data={reportStore.state.unAssignedStudent}
                                 columns={columns}
                             />
                         </div>
-
-                        {/* Table Footer / Summary */}
-                        <div className="bg-slate-50 px-8 py-4 border-t border-slate-100 flex items-center justify-between">
-                            <p className="text-xs font-bold text-slate-500 italic">Showing all {reportStore.state.unAssignedStudent.length} records</p>
-                            <div className="flex gap-2">
-                                <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                                <div className="h-2 w-2 rounded-full bg-slate-200"></div>
-                                <div className="h-2 w-2 rounded-full bg-slate-200"></div>
-                            </div>
-                        </div>
                     </div>
+
                 ) : (
-                    <div className="relative overflow-hidden bg-white border border-slate-200 rounded-[2rem] p-12">
-                        {/* Decorative Grid Background */}
-                        <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
-                            style={{ backgroundImage: `radial-gradient(#000 1px, transparent 1px)`, backgroundSize: '24px 24px' }}>
-                        </div>
 
-                        <div className="relative flex flex-col md:flex-row items-center justify-center gap-10">
+                    /* 5. Empty State */
+                    <div />
 
-                            {/* Left Side: Visual Metric */}
-                            <div className="relative">
-                                <div className="w-32 h-32 rounded-full border-4 border-slate-50 flex items-center justify-center shadow-inner">
-                                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center shadow-lg shadow-emerald-200/50">
-                                        <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                    </div>
-                                </div>
-                                {/* Pulsing indicator */}
-                                <div className="absolute top-0 right-0 w-4 h-4 bg-orange-500 rounded-full border-2 border-white animate-pulse"></div>
-                            </div>
-
-                            {/* Right Side: Text & Data */}
-                            <div className="text-center md:text-left space-y-2">
-                                <h3 className="text-2xl font-bold text-slate-800 tracking-tight">
-                                    No Exceptions Found
-                                </h3>
-                                <p className="text-slate-500 font-medium max-w-xs leading-relaxed">
-                                    Students records are fully compliant with the current <span className="text-slate-900 font-semibold">{reportStore.state.reportType?.replace('_', ' ')}</span> criteria.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
                 )}
-            </div>
+            </main>
         </div>
     );
 });

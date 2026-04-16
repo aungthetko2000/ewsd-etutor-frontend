@@ -15,11 +15,27 @@ export type Student = {
   registrationDate: string;
 };
 
+export type TutorMessageAverage = {
+  tutorId: number;
+  tutorName: string;
+  totalMessages: number;
+  uniqueContacts: number;
+  averageMessagesPerContact: number;
+};
+
+export type MessageLast7Days = {
+  day: string;
+  date: string;
+  count: number;
+};
+
 export class ExceptionReportState {
 
     reportType: string = ""
     inactiveRange: string = ""
     unAssignedStudent: Student[] = []
+    averageTutorMessage: TutorMessageAverage[] = []
+    messageLastDays: MessageLast7Days[] = []
     loading: boolean = false
 
     constructor() {
@@ -36,6 +52,14 @@ export class ExceptionReportState {
 
     setUnAssignedStudent(unAssignedStudent: Student[]) {
         this.unAssignedStudent = unAssignedStudent;
+    }
+
+    setAverageTutorMessage(averageTutorMessage: TutorMessageAverage[]) {
+        this.averageTutorMessage = averageTutorMessage;
+    }
+
+    setMessageLastDays(messageLastDays: MessageLast7Days[]) {
+        this.messageLastDays = messageLastDays;
     }
 
     setLoading(loading: boolean) {

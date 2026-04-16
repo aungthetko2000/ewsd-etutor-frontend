@@ -35,4 +35,29 @@ export class ExceptionReportAction {
         }
     }
 
+    getAverageNumberByTutor = async () => {
+        try {
+            this.state.loading = true
+            const response = await reportApi.getAverageReport();
+            this.state.setAverageTutorMessage(response.data.data);
+        } catch (error) {
+            console.error(error)
+        } finally {
+            this.state.loading = false
+        }
+    }
+
+    getTotalMessageLast7Days = async () => {
+        try {
+            this.state.loading = true
+            const response = await reportApi.getTotalMessageLast7Days();
+            console.log('Last 7 days message', response.data.data);
+            this.state.setMessageLastDays(response.data.data);
+        } catch (error) {
+            console.error(error)
+        } finally {
+            this.state.loading = false
+        }
+    }
+
 }

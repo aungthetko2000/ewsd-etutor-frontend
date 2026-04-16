@@ -6,5 +6,6 @@ const action = new TutorAction(state);
 
 export const tutorStore = {
     state,
-    getAllTutors: action.getAllTutorList
+    getAllTutors: action.getAllTutorList,
+    getAssignedStudentsById: action.getAssignedStudentsById
 }

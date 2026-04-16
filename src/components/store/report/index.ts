@@ -7,5 +7,7 @@ const action = new ExceptionReportAction(state);
 export const reportStore = {
     state,
     getUnassignedStudent: action.getAllUnAssignedStudent,
-    getInActiveReport: action.getInActiveStudents
+    getInActiveReport: action.getInActiveStudents,
+    getAverageReport: action.getAverageNumberByTutor,
+    getTotalMessageLast7Days: action.getTotalMessageLast7Days
 }
