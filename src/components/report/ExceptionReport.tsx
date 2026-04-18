@@ -57,9 +57,9 @@ const ExceptionReport = observer(() => {
         ),
         datasets: [
             {
-                label: "Total Messages",
+                label: "Average Messages Per Contact",
                 data: reportStore.state.averageTutorMessage.map(
-                    item => item.totalMessages
+                    item => item.averageMessagesPerContact
                 ),
                 borderWidth: 1
             }

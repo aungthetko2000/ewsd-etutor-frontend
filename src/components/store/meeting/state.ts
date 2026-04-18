@@ -1,5 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import type { ArrangeMeetingSchedulePayload, MeetingType } from "../../../service/meeting/meetingApi";
+import type { ArrangeMeetingSchedulePayload, MeetingNoteRequest, MeetingType } from "../../../service/meeting/meetingApi";
 import { calculateDuration } from "./function";
 
 interface CalendarEvent {
@@ -31,6 +31,11 @@ export interface MeetingSchedule {
     sessionColor: string
 }
 
+export type SessionNote = {
+    id: number,
+    sessionNote: string
+}
+
 const todayStr = new Date().toISOString().split("T")[0];
 
 export class MeetingState {
@@ -50,6 +55,8 @@ export class MeetingState {
     loading: boolean = false;
     meetingSchedules: MeetingSchedule[] = []
     suggestion: string[] = [] 
+    note: string = "";
+    sessionNote: SessionNote | null = null;
 
     constructor() {
         makeAutoObservable(this);
@@ -74,6 +81,14 @@ export class MeetingState {
 
     setSuggestion(suggestion: string[]) {
         this.suggestion = suggestion;
+    }
+
+    setNote(note: string) {
+        this.note = note;
+    }
+
+    setSessionNote(sessionNote: SessionNote) {
+        this.sessionNote = sessionNote
     }
 
     resetForm() {
@@ -105,6 +120,13 @@ export class MeetingState {
             location: this.location,
             virtualPlatform: this.virtualPlatform,
             virtualPlatformLink: this.virtualPlatformLink
+        }
+    }
+
+    createSaveNotePayload (id: number): MeetingNoteRequest {
+        return {
+            id: id,
+            note: this.note || ""
         }
     }
 

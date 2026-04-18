@@ -68,6 +68,82 @@ const DocumentUpload = observer(() => {
   return (
     <div className="flex bg-slate-50 min-h-screen">
       <div className="flex-1 flex justify-center">
+        <div>
+          {assignmentStore.state.selectedAssignment ? (
+            <div className="bg-white rounded-3xl shadow-lg border border-slate-200 overflow-hidden">
+              {/* Header */}
+              <div className="px-6 py-5 bg-gradient-to-r from-orange-500 to-rose-500 text-white">
+                <h2 className="text-sm md:text-sm font-bold">
+                  Assignment Details
+                </h2>
+                <p className="text-sm text-indigo-100 mt-1">
+                  View selected assignment information
+                </p>
+              </div>
+
+              {/* Responsive Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm md:text-base">
+                  <tbody>
+                    <tr className="border-b hover:bg-slate-50 transition">
+                      <th className="px-4 md:px-6 py-4 bg-slate-50 text-slate-700 font-semibold w-40">
+                        ID
+                      </th>
+                      <td className="px-4 md:px-6 py-4 text-slate-800">
+                        {assignmentStore.state.selectedAssignment.id}
+                      </td>
+                    </tr>
+
+                    <tr className="border-b hover:bg-slate-50 transition">
+                      <th className="px-4 md:px-6 py-4 bg-slate-50 text-slate-700 font-semibold">
+                        Title
+                      </th>
+                      <td className="px-4 md:px-6 py-4 font-medium text-slate-900">
+                        {assignmentStore.state.selectedAssignment.title}
+                      </td>
+                    </tr>
+
+                    <tr className="border-b hover:bg-slate-50 transition">
+                      <th className="px-4 md:px-6 py-4 bg-slate-50 text-slate-700 font-semibold">
+                        Description
+                      </th>
+                      <td className="px-4 md:px-6 py-4 text-slate-700 leading-relaxed">
+                        {assignmentStore.state.selectedAssignment.description}
+                      </td>
+                    </tr>
+
+                    <tr className="border-b hover:bg-slate-50 transition">
+                      <th className="px-4 md:px-6 py-4 bg-slate-50 text-slate-700 font-semibold">
+                        Due Date
+                      </th>
+                      <td className="px-4 md:px-6 py-4 text-red-500 font-semibold">
+                        {assignmentStore.state.selectedAssignment.dueDate}
+                      </td>
+                    </tr>
+
+                    <tr className="border-b hover:bg-slate-50 transition">
+                      <th className="px-4 md:px-6 py-4 bg-slate-50 text-slate-700 font-semibold">
+                        Subject
+                      </th>
+                      <td className="px-4 md:px-6 py-4">
+                        <span className="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-xs md:text-sm font-medium">
+                          {assignmentStore.state.selectedAssignment.subject}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center p-10 md:p-14 bg-white rounded-3xl border border-slate-200 shadow-sm">
+              <div className="text-5xl mb-4">📚</div>
+              <p className="text-slate-500 italic text-base md:text-lg">
+                Please select a subject above to begin.
+              </p>
+            </div>
+          )}
+        </div>
         <div className="flex-1 max-w-3xl mx-auto p-6 space-y-8">
           <nav className="flex flex-wrap gap-2 justify-center border-b border-slate-200 pb-6">
             {assignmentStore.state.assignments.map((assignment) => {

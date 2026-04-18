@@ -11,9 +11,10 @@ import {
     CircleDot
 } from "lucide-react";
 import { useParams } from "react-router-dom";
+import { formatDate } from "../store/comment/function";
 
 const IndividualAssignments = observer(() => {
-    
+
     const { documentStore, commentStore } = useStore();
     const [activeId, setActiveId] = useState<number | null>(null);
     const [acceptedIds, setAcceptedIds] = useState<number[]>([]);
@@ -44,20 +45,32 @@ const IndividualAssignments = observer(() => {
         commentStore.postComments(payload);
     }
 
+    const handleGetAllReviews = (submissionId: number) => {
+        commentStore.getAllFeedBacks(submissionId);
+    }
+
     return (
         <div className="h-screen flex bg-[#FBFBFE] text-slate-900 antialiased font-sans">
 
             {/* --- SIDEBAR LIST --- */}
             <aside className="w-80 border-r border-slate-200 bg-white flex flex-col">
-                <div className="p-6">
+
+                {/* Header */}
+                <div className="p-6 border-b border-slate-100">
                     <div className="flex items-center gap-2 mb-1">
                         <div className="w-2 h-6 bg-gradient-to-r from-orange-500 to-rose-500 rounded-full" />
-                        <h1 className="text-xl font-bold tracking-tight text-slate-800">Review Queue</h1>
+                        <h1 className="text-xl font-bold tracking-tight text-slate-800">
+                            Review Queue
+                        </h1>
                     </div>
-                    <p className="text-xs text-slate-400 font-medium px-1">{documentStore.state.individualSubmissions.length} Pending Submissions</p>
+
+                    <p className="text-xs text-slate-400 font-medium px-1">
+                        {documentStore.state.individualSubmissions.length} Pending Submissions
+                    </p>
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-3 pb-4 space-y-1">
+                {/* Submission List */}
+                <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2">
                     {documentStore.state.individualSubmissions.map((file) => {
                         const isSelected = activeId === file.id;
                         const isDone = acceptedIds.includes(file.id);
@@ -66,30 +79,43 @@ const IndividualAssignments = observer(() => {
                             <button
                                 key={file.id}
                                 onClick={() => {
+                                    handleGetAllReviews(file.id);
                                     setActiveId(file.id);
-                                    commentStore.state.description = ""
+                                    commentStore.state.description = "";
                                 }}
-                                className={`w-full group flex flex-col gap-1 p-3 rounded-xl transition-all duration-200 text-left
-                                    ${isSelected
-                                        ? "bg-rose-50 ring-1 ring-orange-200"
-                                        : "hover:bg-slate-50"}
-                                `}
+                                className={`w-full group flex flex-col gap-1 p-3 rounded-2xl transition-all duration-200 text-left
+          ${isSelected
+                                        ? "bg-rose-50 ring-1 ring-orange-200 shadow-sm"
+                                        : "hover:bg-slate-50"
+                                    }`}
                             >
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2 min-w-0">
-                                        <FileText className={`w-4 h-4 shrink-0 ${isSelected ? "text-orange-600" : "text-slate-400"}`} />
-                                        <p className={`text-sm font-semibold truncate ${isSelected ? "text-orange-500" : "text-slate-700"}`}>
+                                        <FileText
+                                            className={`w-4 h-4 shrink-0 ${isSelected ? "text-orange-600" : "text-slate-400"
+                                                }`}
+                                        />
+                                        <p
+                                            className={`text-sm font-semibold truncate ${isSelected ? "text-orange-500" : "text-slate-700"
+                                                }`}
+                                        >
                                             {file.fileName}
                                         </p>
                                     </div>
-                                    {isDone && <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />}
+
+                                    {isDone && (
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                                    )}
                                 </div>
 
                                 <div className="flex items-center justify-between mt-1">
                                     <span className="text-[11px] text-slate-400 flex items-center gap-1 font-medium">
                                         <Clock className="w-3 h-3" />
-                                        {new Date(activeFile?.uploadTimestamp || Date.now()).toLocaleDateString()}
+                                        {new Date(
+                                            file.uploadTimestamp || Date.now()
+                                        ).toLocaleDateString()}
                                     </span>
+
                                     {!isDone && !isSelected && (
                                         <ChevronRight className="w-3 h-3 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
                                     )}
@@ -97,6 +123,45 @@ const IndividualAssignments = observer(() => {
                             </button>
                         );
                     })}
+                </div>
+
+                {/* Discussion Section */}
+                <div className="border-t border-slate-200 bg-slate-50 flex flex-col">
+
+                    {/* Title */}
+                    <div className="bg-rose-50 ring-1 ring-orange-200 shadow-sm px-4 py-3 border-b border-slate-200">
+                        <h2 className="text-sm font-bold text-orange-600">
+                            Feedbacks
+                        </h2>
+                    </div>
+
+                    {/* Feed back */}
+                    <div className="max-h-80 overflow-y-auto px-3 py-3 space-y-3 pr-2 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
+                        {commentStore.state.feedbacks
+                            .slice()
+                            .reverse()
+                            .map((feedback, index) => {
+                                return (
+                                    <div key={index} className="flex">
+                                        <div className="px-4 py-2 rounded-2xl shadow-sm bg-white border border-slate-200 w-100">
+                                            <p className="text-sm leading-relaxed break-words text-slate-700">
+                                                {feedback.description}
+                                            </p>
+
+                                            <div className="text-[10px] mt-1 text-slate-400">
+                                                {formatDate(feedback.timeStamp)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+
+                        {commentStore.state.feedbacks.length === 0 && (
+                            <div className="text-center text-sm text-slate-400 py-8 italic">
+                                No discussion yet.
+                            </div>
+                        )}
+                    </div>
                 </div>
             </aside>
 
@@ -194,7 +259,7 @@ const IndividualAssignments = observer(() => {
                                         <button
                                             onClick={() => handlePostComments()}
                                             disabled={!isAccepted || !commentStore.state.description}
-                                            className="cursor-pointer group flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-orange-500 to-rose-500 text-white text-xs font-bold rounded-xl disabled:bg-slate-200 disabled:text-slate-400 transition-all hover:bg-indigo-600"
+                                            className="cursor-pointer group flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-orange-500 to-rose-500 text-white text-xs font-bold rounded-xl disabled:bg-slate-200 disabled:text-white-400 transition-all hover:bg-indigo-600"
                                         >
                                             Submit Review
                                             <SendHorizonal className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />

@@ -9,5 +9,7 @@ export const meetingStore = {
     arrangeMeeting: action.arrangeMeetingSchedule,
     gtAllMeetingSchedule: action.getAllMeetingSchedule,
     getAllStudentEmail: action.getStudentEmailByTutor,
-    updateMeetingStatus: action.updateMeetingSatus
+    updateMeetingStatus: action.updateMeetingSatus,
+    saveMeetingNote: action.saveMeetingNote,
+    getMeetingNoteById: action.getMeetingNoteById
 }

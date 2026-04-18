@@ -24,6 +24,7 @@ function EventPill({ event, onClick }: { event: CalendarEvent; onClick: (e: Reac
   );
 }
 
+
 // ─── Main Calendar ────────────────────────────────────────────────────────────
 const CalendarSchedule = observer(() => {
 
@@ -34,7 +35,10 @@ const CalendarSchedule = observer(() => {
 
   const { meetingStore } = useStore();
 
-  // Add session modal
+  useEffect(() => {
+    meetingStore.gtAllMeetingSchedule();
+  }, [])
+
   const [addModalDate, setAddModalDate] = useState<{ year: number; month: number; day: number } | null>(null);
   const [detailState, setDetailState] = useState<{ event: CalendarEvent; dateLabel: string; isPast: boolean } | null>(null);
 

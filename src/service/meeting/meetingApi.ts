@@ -17,6 +17,11 @@ export interface ArrangeMeetingSchedulePayload {
   virtualPlatformLink: string;
 }
 
+export interface MeetingNoteRequest {
+    id: number,
+    note: string,
+}
+
 export const MeetingStatus = {
   PENDING: "PENDING",
   CONFIRMED: "CONFIRMED",
@@ -45,5 +50,13 @@ export const meetingApi = {
 
     updateMeetingStatus: async (meetingId: number, payload: MeetingConfirmationRequest) => {
         return api.post(`/meeting/status/${meetingId}`, payload);
-    }
+    },
+
+    saveMeeting: async (payload: MeetingNoteRequest) => {
+        return api.post("/meeting/note", payload);
+    },
+
+    getMeetingNote: async (id: number) => {
+        return api.get(`/meeting/note/${id}`);
+    },
 }

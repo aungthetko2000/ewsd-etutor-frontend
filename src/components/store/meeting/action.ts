@@ -6,6 +6,7 @@ import {
 } from "../../../service/meeting/meetingApi";
 
 export class MeetingAction {
+
     private state: MeetingState;
 
     constructor(state: MeetingState) {
@@ -18,7 +19,6 @@ export class MeetingAction {
             this.state.loading = true;
             const payload = this.state.createMeetingPayload();
             const res = await meetingApi.arrangeMeeting(payload);
-            console.log("CREATE response:", res.data.data);
             runInAction(() => {
                 this.state.meetingSchedules.push(res.data.data);
             });
@@ -30,6 +30,33 @@ export class MeetingAction {
             this.state.loading = false;
         }
     };
+
+    saveMeetingNote = async (id: number) => {
+        try {
+            this.state.loading = true;
+            const payload = this.state.createSaveNotePayload(id);
+            await meetingApi.saveMeeting(payload);
+            this.state.setNote("")
+        } catch (err) {
+            console.error(err)
+        } finally {
+            this.state.loading = false;
+        }
+    }
+
+    getMeetingNoteById = async (id: number) => {
+        try {
+            this.state.loading = true;
+            this.state.note = "";
+            this.state.sessionNote = null;
+            const response = await meetingApi.getMeetingNote(id);
+            this.state.setSessionNote(response.data.data);
+        } catch (err) {
+            console.error(err)
+        } finally {
+            this.state.loading = false;
+        }
+    }
 
     getAllMeetingSchedule = async () => {
         try {
