@@ -125,7 +125,6 @@ const ExceptionReport = observer(() => {
             {/* Filter Bar: Enhanced Interaction */}
             <section className="bg-white border border-slate-200/60 shadow-xl shadow-slate-200/40 rounded-3xl p-3">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-
                     {/* Report Type Select */}
                     <div className="md:col-span-1 group">
                         <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-2">Report Category</label>
