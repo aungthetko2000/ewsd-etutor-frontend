@@ -176,22 +176,24 @@ const BlogDashboard = observer(() => {
                                         className="group flex flex-col bg-white rounded-[2.5rem] border border-slate-100 hover:border-orange-200 shadow-sm hover:shadow-[0_40px_80px_-20px_rgba(255,107,0,0.12)] transition-all duration-500 overflow-hidden h-full transform hover:-translate-y-2"
                                     >
                                         <div className="relative h-60 overflow-hidden bg-slate-50">
-                                        <img
-                                            src={`http://localhost:8080/images/${blog.imageUrl}`}
-                                            alt={blog.title}
-                                            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                                    </div>
+                                            <img
+                                                src={`http://localhost:8080/images/${blog.imageUrl}`}
+                                                alt={blog.title}
+                                                className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                                        </div>
 
                                         {/* Content */}
                                         <div className="p-8 flex flex-col flex-grow">
                                             <h4 className="text-xl font-extrabold text-slate-800 leading-tight mb-4 group-hover:text-orange-600 transition-colors line-clamp-2">
                                                 {blog.title}
                                             </h4>
-                                            <p className="text-slate-500 text-sm leading-relaxed mb-8 line-clamp-3 font-medium">
-                                                {blog.content}
-                                            </p>
+
+
+                                            <p className="text-slate-500 text-sm leading-relaxed mb-8 line-clamp-3 font-medium"
+                                                dangerouslySetInnerHTML={{ __html: blog.content }}
+                                            />
 
                                             {/* Footer */}
                                             <div className="mt-auto flex items-center justify-between pt-6 border-t border-slate-50">

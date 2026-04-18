@@ -5,6 +5,21 @@ import {
 } from "../../../service/staff/staffApi";
 import type { StaffState } from "./state";
 
+export type Student = {
+  firstName: string;
+  lastName: string;
+  fatherName: string;
+  dob: string;
+  gender: string;
+  email: string;
+  phone: string;
+  emergencyContact: string;
+  session: string;
+  address: string;
+  course: string;
+  registrationDate: string;
+};
+
 export class StaffAction {
 
     private state: StaffState;
@@ -35,6 +50,17 @@ export class StaffAction {
             const res = await staffApi.getAllAllocationList();
             this.state.setAllocatedList(res.data.data);
             console.log('Allocated List', res.data.data);
+        } catch (err) {
+            console.error(err);
+            throw err;
+        } finally {
+            this.state.loading = false;
+        }
+    };
+
+    registerStudent = async (payload: Student) => {
+        try {
+            await staffApi.registerStudent(payload);
         } catch (err) {
             console.error(err);
             throw err;

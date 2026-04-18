@@ -8,6 +8,7 @@ import { MeetingStatus } from "../../../service/meeting/meetingApi";
 import { toast, ToastContainer } from "react-toastify";
 import LoaderIcon from "../../common/LoaderIcon";
 import PermissionGate from "../../auth/PermissionGate";
+import { useNavigate } from "react-router-dom";
 
 const Header = observer(
     ({
@@ -25,6 +26,8 @@ const Header = observer(
         const [declineId, setDeclineId] = useState<number | null>(null);
         const [reasons, setReasons] = useState<Record<number, string>>({});
         const [errors, setErrors] = useState<Record<number, boolean>>({});
+
+        const navigate = useNavigate();
 
         useEffect(() => {
             const userInfo = sessionStorage.getItem("user");
@@ -86,17 +89,17 @@ const Header = observer(
                     reason: reasons[id],
                 });
                 toast.success("Meeting declined!", {
-                  hideProgressBar: true,
-                  style: {
-                    background: "linear-gradient(135deg, #fff7ed 0%, #fff1f2 100%)",
-                    color: "#9a3412",
-                    fontWeight: "700",
-                    fontSize: "14px",
-                    borderRadius: "16px",
-                    border: "1px solid #ffedd5",
-                    boxShadow: "0 10px 25px -5px rgba(249, 115, 22, 0.15)",
-                    padding: "16px"
-                  }
+                    hideProgressBar: true,
+                    style: {
+                        background: "linear-gradient(135deg, #fff7ed 0%, #fff1f2 100%)",
+                        color: "#9a3412",
+                        fontWeight: "700",
+                        fontSize: "14px",
+                        borderRadius: "16px",
+                        border: "1px solid #ffedd5",
+                        boxShadow: "0 10px 25px -5px rgba(249, 115, 22, 0.15)",
+                        padding: "16px"
+                    }
                 });
                 setDeclineId(null);
                 setReasons((prev) => ({ ...prev, [id]: "" }));
@@ -112,8 +115,8 @@ const Header = observer(
                 meetingStatus: MeetingStatus.CONFIRMED,
             });
             toast.success("Meeting confirmed!", {
-                  hideProgressBar: true,
-                  style: {
+                hideProgressBar: true,
+                style: {
                     background: "linear-gradient(135deg, #fff7ed 0%, #fff1f2 100%)",
                     color: "#9a3412",
                     fontWeight: "700",
@@ -122,8 +125,8 @@ const Header = observer(
                     border: "1px solid #ffedd5",
                     boxShadow: "0 10px 25px -5px rgba(249, 115, 22, 0.15)",
                     padding: "16px"
-                  }
-                });
+                }
+            });
             notificationStore.handleNotification(id);
         };
 
@@ -171,6 +174,25 @@ const Header = observer(
                     <div className="flex items-center gap-4">
                         <PermissionGate permissions={["CREATE_BLOG"]}>
                             <button
+                                onClick={() => navigate("/blogs")}
+                                className="group cursor-pointer relative p-2.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-all duration-200 active:scale-95"
+                            >
+                                <svg
+                                    className="w-6 h-6 transition-transform group-hover:rotate-[15deg]"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
+                                    <path d="M18 14h-8" />
+                                    <path d="M15 18h-5" />
+                                    <path d="M10 6h8v4h-8z" />
+                                </svg>
+                            </button>
+                            <button
                                 onClick={onBlogClick}
                                 className="group cursor-pointer relative p-2.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-all duration-200 active:scale-95"
                             >
@@ -187,6 +209,31 @@ const Header = observer(
                                         strokeWidth={2}
                                         d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                                     />
+                                </svg>
+                            </button>
+                        </PermissionGate>
+
+                        <PermissionGate permissions={["CREATE_STUDENT"]}>
+                            <button
+                                onClick={() => navigate("/studentRegistration")}
+                                className="group cursor-pointer relative p-2.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-all duration-200 active:scale-95"
+                            >
+                                <svg
+                                    className="w-6 h-6 transition-transform group-hover:rotate-[15deg]"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    {/* Graduation Cap / Mortarboard */}
+                                    <path d="M2 10l10-5 10 5-10 5z" />
+                                    <path d="M6 12v5c0 1.1 2.7 2 6 2s6-.9 6-2v-5" />
+
+                                    {/* Plus Sign for Registration */}
+                                    <line x1="19" y1="16" x2="19" y2="22" />
+                                    <line x1="16" y1="19" x2="22" y2="19" />
                                 </svg>
                             </button>
                         </PermissionGate>
@@ -306,8 +353,8 @@ const Header = observer(
                                                                 {declineId === notif.id && (
                                                                     <div
                                                                         className={`mt-3 p-2 rounded-lg animate-in slide-in-from-top-2 ${errors[notif.id]
-                                                                                ? "border-rose-500 bg-rose-50 ring-2 ring-rose-100"
-                                                                                : "border-gray-200 bg-gray-50"
+                                                                            ? "border-rose-500 bg-rose-50 ring-2 ring-rose-100"
+                                                                            : "border-gray-200 bg-gray-50"
                                                                             }`}
                                                                     >
                                                                         <textarea

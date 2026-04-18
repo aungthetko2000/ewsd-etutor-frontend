@@ -7,5 +7,6 @@ const action = new StaffAction(state);
 export const staffStore = {
     state,
     bulkAllocateStudents: action.bulkAllocateStudents,
-    getAllAllocation: action.getAllAllocation
+    getAllAllocation: action.getAllAllocation,
+    registerStudent: action.registerStudent
 }

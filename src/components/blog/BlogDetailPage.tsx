@@ -178,10 +178,16 @@ const BlogDetailPage = observer(() => {
             font-serif
             selection:bg-orange-200
           ">
-
-          <div className="whitespace-pre-line">
-            {blog.content}
-          </div>
+          <div
+            className="prose max-w-none whitespace-pre-line [&_h1]:text-3xl [&_h1]:font-bold
+                  [&_h2]:text-2xl [&_h2]:font-bold
+                  [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-3
+                  [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-3
+                  [&_li]:mb-1
+                  [&_blockquote]:border-l-4 [&_blockquote]:pl-4 italic
+                  [&_img]:rounded-xl [&_img]:my-4"
+            dangerouslySetInnerHTML={{ __html: blog.content }}
+          />
         </article>
       </main>
 

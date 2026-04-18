@@ -5,22 +5,6 @@ import AssignedStudents from "../assignedStudent/AssignedStudents";
 import NewBlog from "../blog/NewBlog";
 import UploadAssignment from "../assignment/UploadAssignment";
 
-const IconDashboard = ({ className }: any) => (
-    <svg
-        className={className}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-    >
-        <path
-            d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        />
-    </svg>
-);
-
 const IconSchedule = ({ className }: any) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -69,7 +53,6 @@ const TutorDashBoard = () => {
     const [showNewBlog, setShowNewBlog] = useState(false);
 
     const menu = [
-        { key: "dashboard", label: "Dashboard", icon: IconDashboard },
         { key: "schedule", label: "Schedule", icon: IconSchedule },
         { key: "document", label: "Document", icon: IconDocument },
         { key: "assigned-students", label: "Students", icon: IconStudent }
@@ -77,8 +60,6 @@ const TutorDashBoard = () => {
 
     const renderContent = () => {
         switch (activeTab) {
-            case "dashboard":
-                return;
             case "schedule":
                 return <CalendarSchedule />;
             case "document":

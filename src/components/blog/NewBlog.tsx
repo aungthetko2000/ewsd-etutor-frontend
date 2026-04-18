@@ -314,21 +314,6 @@ const NewBlog: React.FC<NewBlogProps> = observer(({ show, onClose }) => {
                     <button onMouseDown={(e) => handleFormat(e, 'insertUnorderedList')} className="p-1.5 text-[#64748b] hover:text-[#1e1b4b] hover:bg-[#e2e8f0] rounded transition-colors"><List size={18} /></button>
                     <button onMouseDown={(e) => handleFormat(e, 'insertOrderedList')} className="p-1.5 text-[#64748b] hover:text-[#1e1b4b] hover:bg-[#e2e8f0] rounded transition-colors"><ListOrdered size={18} /></button>
                   </div>
-
-                  <div className="w-px h-5 bg-[#cbd5e1]"></div>
-
-                  <div className="flex items-center gap-1">
-                    <button onMouseDown={(e) => openUrlPrompt(e)} className="p-1.5 text-[#64748b] hover:text-[#1e1b4b] hover:bg-[#e2e8f0] rounded transition-colors"><LinkIcon size={18} /></button>
-                    <button onMouseDown={(e) => handleFormat(e, 'formatBlock', 'BLOCKQUOTE')} className="p-1.5 text-[#64748b] hover:text-[#1e1b4b] hover:bg-[#e2e8f0] rounded transition-colors"><Quote size={18} /></button>
-                    <button onMouseDown={(e) => { e.preventDefault(); editorImageInputRef.current?.click(); }} className="p-1.5 text-[#64748b] hover:text-[#1e1b4b] hover:bg-[#e2e8f0] rounded transition-colors"><ImageIcon size={18} /></button>
-                    <input
-                      ref={editorImageInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleEditorImageUpload}
-                    />
-                  </div>
                 </div>
 
                 <div className="flex items-center gap-1 ml-auto sm:ml-4">
@@ -336,55 +321,6 @@ const NewBlog: React.FC<NewBlogProps> = observer(({ show, onClose }) => {
                   <button onMouseDown={(e) => handleFormat(e, 'redo')} className="p-1.5 text-[#94a3b8] hover:text-[#1e1b4b] hover:bg-[#e2e8f0] rounded transition-colors"><Redo size={18} /></button>
                 </div>
               </div>
-
-              {urlPrompt.isOpen && (
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-5 rounded-2xl shadow-2xl border border-[#e0e7ff] z-50 w-80">
-                  <h4 className="font-bold text-[#1e1b4b] mb-3">
-                    Insert Link
-                  </h4>
-                  <input 
-                    autoFocus
-                    type="text" 
-                    placeholder="https://example.com"
-                    className="w-full border border-[#e0e7ff] rounded-xl px-4 py-2.5 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-[#818cf8]/50 focus:border-[#818cf8] transition-all"
-                    value={urlInput}
-                    onChange={(e) => setUrlInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') applyUrl();
-                      if (e.key === 'Escape') setUrlPrompt({ ...urlPrompt, isOpen: false });
-                    }}
-                  />
-                  <div className="flex justify-end gap-2">
-                    <button 
-                      onClick={() => setUrlPrompt({ ...urlPrompt, isOpen: false })}
-                      className="px-4 py-2 text-sm font-bold text-[#64748b] hover:bg-[#f8fafc] rounded-xl transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      onClick={applyUrl}
-                      className="px-4 py-2 text-sm font-bold bg-[#818cf8] text-white rounded-xl hover:bg-[#6366f1] transition-colors shadow-lg shadow-[#818cf8]/20"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {selectedImage && (
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-[#1e1b4b] text-white px-3 py-2 rounded-xl shadow-2xl flex items-center gap-1 z-50 transition-all">
-                  <span className="text-xs font-bold mr-2 text-[#a5b4fc]">Image</span>
-                  <button onMouseDown={(e) => updateImageStyle(e, { display: 'inline', float: 'left', margin: '0 1rem 1rem 0' })} className="p-1.5 hover:bg-white/20 rounded transition-colors" title="Align Left"><AlignLeft size={16} /></button>
-                  <button onMouseDown={(e) => updateImageStyle(e, { display: 'block', float: 'none', margin: '0 auto 1rem auto' })} className="p-1.5 hover:bg-white/20 rounded transition-colors" title="Align Center"><AlignCenter size={16} /></button>
-                  <button onMouseDown={(e) => updateImageStyle(e, { display: 'inline', float: 'right', margin: '0 0 1rem 1rem' })} className="p-1.5 hover:bg-white/20 rounded transition-colors" title="Align Right"><AlignRight size={16} /></button>
-                  <div className="w-px h-4 bg-white/30 mx-1"></div>
-                  <button onMouseDown={(e) => updateImageStyle(e, { width: '50%', height: 'auto' })} className="p-1.5 hover:bg-white/20 rounded transition-colors" title="50% Width"><Minimize size={16} /></button>
-                  <button onMouseDown={(e) => updateImageStyle(e, { width: '100%', height: 'auto' })} className="p-1.5 hover:bg-white/20 rounded transition-colors" title="100% Width"><Maximize size={16} /></button>
-                  <div className="w-px h-4 bg-white/30 mx-1"></div>
-                  <button onMouseDown={deleteImage} className="p-1.5 hover:bg-red-500/80 text-red-300 hover:text-white rounded transition-colors" title="Delete Image"><Trash size={16} /></button>
-                </div>
-              )}
-
               <div
                 ref={contentRef}
                 contentEditable

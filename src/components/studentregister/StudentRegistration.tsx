@@ -1,18 +1,17 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-
-import { 
-  User, 
-  Mail, 
-  IdCard, 
-  GraduationCap, 
-  ArrowRight, 
-  CheckCircle2, 
+import {
+  User,
+  Mail,
+  IdCard,
+  GraduationCap,
+  ArrowRight,
+  CheckCircle2,
   AlertCircle,
   Loader2,
-  Camera,
-  X
 } from 'lucide-react';
+import { useStore } from '../store/useStore';
+import { useNavigate } from 'react-router-dom';
 
 // --- Types ---
 export interface RegistrationResponse {
@@ -30,133 +29,158 @@ export interface FormErrors {
   lastName?: string;
   fatherName?: string;
   email?: string;
-  password?: string;
   phone?: string;
   dob?: string;
   gender?: string;
   address?: string;
   emergencyContact?: string;
   course?: string;
-  grade?: string;
-  enrollmentDate?: string;
-  photo?: string;
+  session?: string;
+  registrationDate?: string;
 }
 
-/**
- * StudentRegistration - The main point of the registration screen
- */
 export default function StudentRegistration() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     fatherName: '',
     email: '',
-    password: '',
     phone: '',
     dob: '',
     gender: '',
     address: '',
     emergencyContact: '',
     course: '',
-    grade: '',
-    enrollmentDate: '',
-    photo: '' // This will now store the base64 string
+    session: '',
+    registrationDate: '',
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [response, setResponse] = useState<RegistrationResponse | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const validateForm = (): boolean => {
+  const { staffStore } = useStore();
+
+  const navigate = useNavigate();
+
+  const validateForm = () => {
     const newErrors: FormErrors = {};
-    const required = [
-      'firstName', 'lastName', 'fatherName', 'email', 'password', 
-      'phone', 'dob', 'gender', 'address', 'emergencyContact', 
-      'course', 'grade', 'enrollmentDate'
+
+    const requiredFields = [
+      'firstName',
+      'lastName',
+      'fatherName',
+      'email',
+      'phone',
+      'dob',
+      'gender',
+      'address',
+      'emergencyContact',
+      'course',
+      'session',
+      'registrationDate',
     ];
-    
-    required.forEach(field => {
+
+    requiredFields.forEach((field) => {
       if (!formData[field as keyof typeof formData]) {
         newErrors[field as keyof FormErrors] = 'Required';
       }
     });
 
-    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
+    if (
+      formData.email &&
+      !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)
+    ) {
       newErrors.email = 'Invalid email';
-    }
-    
-    if (formData.password && !/^\d{6}$/.test(formData.password)) {
-      newErrors.password = 'Must be 6 digits';
     }
 
     setErrors(newErrors);
+
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!validateForm()) return;
 
     setIsSubmitting(true);
     setResponse(null);
 
     try {
-      // Mocking the API call for UI-only ticket
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const successResponse: RegistrationResponse = {
-        success: true,
-        message: `Welcome, ${formData.firstName}! Your registration for ${formData.course} has been received.`,
-        user: { 
-          firstName: formData.firstName, 
-          lastName: formData.lastName, 
-          email: formData.email 
-        }
+      const payload = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        fatherName: formData.fatherName,
+        email: formData.email,
+        phone: formData.phone,
+        dob: formData.dob,
+        gender: formData.gender,
+        address: formData.address,
+        emergencyContact: formData.emergencyContact,
+        session: formData.session,
+        course: formData.course,
+        registrationDate: formData.registrationDate,
       };
 
-      setResponse(successResponse);
-      setFormData({
-        firstName: '', lastName: '', fatherName: '', email: '', password: '',
-        phone: '', dob: '', gender: '', address: '', emergencyContact: '',
-        course: '', grade: '', enrollmentDate: '', photo: ''
+      await staffStore.registerStudent(payload);
+
+      setResponse({
+        success: true,
+        message: 'Student registered successfully.',
+        user: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+        },
       });
-    } catch (err) {
-      setResponse({ success: false, message: 'Something went wrong.' });
+
+      // reset form
+      setFormData({
+        firstName: '',
+        lastName: '',
+        fatherName: '',
+        email: '',
+        phone: '',
+        dob: '',
+        gender: '',
+        address: '',
+        emergencyContact: '',
+        course: '',
+        session: '',
+        registrationDate: '',
+      });
+    } catch (error: any) {
+      setResponse({
+        success: false,
+        message:
+          error?.response?.data?.message ||
+          error?.message ||
+          'Registration failed.',
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  // ---------------- CHANGE ----------------
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
     if (errors[name as keyof FormErrors]) {
-      setErrors(prev => ({ ...prev, [name]: undefined }));
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        setErrors(prev => ({ ...prev, photo: 'File size must be less than 2MB' }));
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({ ...prev, photo: reader.result as string }));
-        setErrors(prev => ({ ...prev, photo: undefined }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const removePhoto = () => {
-    setFormData(prev => ({ ...prev, photo: '' }));
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      setErrors((prev) => ({
+        ...prev,
+        [name]: undefined,
+      }));
     }
   };
 
@@ -166,12 +190,34 @@ export default function StudentRegistration() {
       <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-[#FF6B35]/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-[#FF3D68]/5 rounded-full blur-3xl pointer-events-none" />
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 w-full max-w-4xl mx-auto"
       >
         <div className="text-center mb-10">
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="cursor-pointer group mb-8 flex items-center gap-2.5 px-4 py-2 
+             bg-white/40 backdrop-blur-md border border-slate-200/60 
+             rounded-full transition-all duration-300 
+             hover:bg-white hover:border-rose-200 hover:shadow-lg hover:shadow-rose-500/5 active:scale-95"
+          >
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 transition-colors group-hover:bg-rose-50">
+              <svg
+                className="w-3.5 h-3.5 text-slate-600 transition-transform group-hover:-translate-x-0.5 group-hover:text-rose-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={3}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 group-hover:text-slate-900">
+              Back
+            </span>
+          </button>
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#FF6B35] to-[#FF3D68] rounded-3xl shadow-lg shadow-orange-200 mb-6">
             <GraduationCap className="w-10 h-10 text-white" />
           </div>
@@ -188,8 +234,8 @@ export default function StudentRegistration() {
                 </div>
                 <h2 className="text-3xl font-bold text-gray-900 mb-3">Enrollment Successful!</h2>
                 <p className="text-gray-600 mb-8 text-lg">{response.message}</p>
-                <button 
-                  onClick={() => setResponse(null)} 
+                <button
+                  onClick={() => setResponse(null)}
                   className="px-10 py-4 bg-gradient-to-r from-[#FF6B35] to-[#FF3D68] text-white rounded-2xl font-bold shadow-lg shadow-orange-200 hover:opacity-90 transition-all"
                 >
                   Register Another Student
@@ -197,44 +243,15 @@ export default function StudentRegistration() {
               </motion.div>
             ) : (
               <motion.form key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} onSubmit={handleSubmit} className="space-y-10">
-                
+
                 {/* Section 1: Personal Information */}
                 <div>
                   <h3 className="text-2xl font-extrabold text-gray-900 mb-8 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
                       <User className="w-5 h-5 text-[#FF6B35]" />
                     </div>
-                    Personal Information
+                    Student Information
                   </h3>
-                  
-                  {/* Photo Upload Section */}
-                  <div className="mb-10 flex flex-col items-center">
-                    <div className="relative group">
-                      <div className={`w-36 h-36 rounded-[2rem] border-2 border-dashed ${formData.photo ? 'border-[#FF6B35]' : 'border-gray-200'} flex items-center justify-center overflow-hidden bg-[#FAFAFA] transition-all`}>
-                        {formData.photo ? (
-                          <img src={formData.photo} alt="Preview" className="w-full h-full object-cover" />
-                        ) : (
-                          <Camera className="w-10 h-10 text-gray-300" />
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => formData.photo ? removePhoto() : fileInputRef.current?.click()}
-                        className={`absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl flex items-center justify-center shadow-xl transition-all ${formData.photo ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-gradient-to-br from-[#FF6B35] to-[#FF3D68] text-white hover:opacity-90'}`}
-                      >
-                        {formData.photo ? <X className="w-5 h-5" /> : <Camera className="w-5 h-5" />}
-                      </button>
-                    </div>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      accept="image/*"
-                      className="hidden"
-                    />
-                    <p className="text-sm text-gray-400 mt-4 font-bold uppercase tracking-wider">Student Photo</p>
-                    {errors.photo && <p className="text-xs text-red-500 mt-1">{errors.photo}</p>}
-                  </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="space-y-2">
@@ -259,7 +276,6 @@ export default function StudentRegistration() {
                         <option value="">Select...</option>
                         <option value="male">Male</option>
                         <option value="female">Female</option>
-                        <option value="other">Other</option>
                       </select>
                     </div>
                   </div>
@@ -277,19 +293,6 @@ export default function StudentRegistration() {
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-gray-700 uppercase tracking-widest ml-1">Email Address</label>
                       <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="name@example.com" className={`w-full px-5 py-4 bg-[#FAFAFA] border ${errors.email ? 'border-red-300' : 'border-gray-100'} rounded-2xl focus:ring-4 focus:ring-orange-50 focus:border-[#FF6B35] focus:outline-none transition-all font-light text-gray-600 placeholder:font-light placeholder:text-gray-400`} />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-gray-700 uppercase tracking-widest ml-1">Password (6-Digit PIN)</label>
-                      <input 
-                        type="password" 
-                        name="password" 
-                        value={formData.password} 
-                        onChange={handleChange} 
-                        placeholder="••••••" 
-                        inputMode="numeric"
-                        maxLength={6}
-                        className={`w-full px-5 py-4 bg-[#FAFAFA] border ${errors.password ? 'border-red-300' : 'border-gray-100'} rounded-2xl focus:ring-4 focus:ring-orange-50 focus:border-[#FF6B35] focus:outline-none transition-all font-light text-gray-600 placeholder:font-light placeholder:text-gray-400`} 
-                      />
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-gray-700 uppercase tracking-widest ml-1">Phone Number</label>
@@ -320,18 +323,18 @@ export default function StudentRegistration() {
                       <input type="text" name="course" value={formData.course} onChange={handleChange} placeholder="Computer Science" className={`w-full px-5 py-4 bg-[#FAFAFA] border ${errors.course ? 'border-red-300' : 'border-gray-100'} rounded-2xl focus:ring-4 focus:ring-orange-50 focus:border-[#FF6B35] focus:outline-none transition-all font-light text-gray-600 placeholder:font-light placeholder:text-gray-400`} />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-gray-700 uppercase tracking-widest ml-1">Grade (Year)</label>
-                      <select name="grade" value={formData.grade} onChange={handleChange} className={`w-full px-5 py-4 bg-[#FAFAFA] border ${errors.grade ? 'border-red-300' : 'border-gray-100'} rounded-2xl focus:ring-4 focus:ring-orange-50 focus:border-[#FF6B35] focus:outline-none transition-all appearance-none font-light text-gray-600`}>
+                      <label className="text-sm font-bold text-gray-700 uppercase tracking-widest ml-1">Session</label>
+                      <select name="session" value={formData.session} onChange={handleChange} className={`w-full px-5 py-4 bg-[#FAFAFA] border ${errors.session ? 'border-red-300' : 'border-gray-100'} rounded-2xl focus:ring-4 focus:ring-orange-50 focus:border-[#FF6B35] focus:outline-none transition-all appearance-none font-light text-gray-600`}>
                         <option value="">Select...</option>
-                        <option value="1">First Year</option>
-                        <option value="2">Second Year</option>
-                        <option value="3">Third Year</option>
-                        <option value="4">Fourth Year</option>
+                        <option value="1">CS-101</option>
+                        <option value="2">CS-102</option>
+                        <option value="3">CS-103</option>
+                        <option value="4">CS-104</option>
                       </select>
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-gray-700 uppercase tracking-widest ml-1">Enrollment Date</label>
-                      <input type="date" name="enrollmentDate" value={formData.enrollmentDate} onChange={handleChange} className={`w-full px-5 py-4 bg-[#FAFAFA] border ${errors.enrollmentDate ? 'border-red-300' : 'border-gray-100'} rounded-2xl focus:ring-4 focus:ring-orange-50 focus:border-[#FF6B35] focus:outline-none transition-all font-light text-gray-600`} />
+                      <input type="date" name="registrationDate" value={formData.registrationDate} onChange={handleChange} className={`w-full px-5 py-4 bg-[#FAFAFA] border ${errors.registrationDate ? 'border-red-300' : 'border-gray-100'} rounded-2xl focus:ring-4 focus:ring-orange-50 focus:border-[#FF6B35] focus:outline-none transition-all font-light text-gray-600`} />
                     </div>
                   </div>
                 </div>
@@ -343,9 +346,9 @@ export default function StudentRegistration() {
                 )}
 
                 <div className="pt-8">
-                  <button 
-                    type="submit" 
-                    disabled={isSubmitting} 
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
                     className="w-full py-5 bg-gradient-to-r from-[#FF6B35] to-[#FF3D68] text-white rounded-[1.5rem] font-bold text-xl shadow-xl shadow-orange-200 hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-4 disabled:opacity-70"
                   >
                     {isSubmitting ? <Loader2 className="w-7 h-7 animate-spin" /> : <>Register Student <ArrowRight className="w-7 h-7" /></>}
@@ -355,7 +358,7 @@ export default function StudentRegistration() {
             )}
           </AnimatePresence>
         </div>
-        
+
         <p className="text-center mt-10 text-gray-400 text-xs font-bold uppercase tracking-[0.2em]">
           © 2026 E-Tutoring System • Design V2.0
         </p>
