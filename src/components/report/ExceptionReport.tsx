@@ -119,18 +119,6 @@ const ExceptionReport = observer(() => {
                             Exception Report
                         </h1>
                     </div>
-                    <p className="text-slate-500 font-medium pl-4">System-wide student status monitoring</p>
-                </div>
-
-                <div className="bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm self-start md:self-auto">
-                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">System Status</span>
-                    <div className="flex items-center gap-2">
-                        <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                        </span>
-                        <p className="text-sm font-bold text-slate-700">Live Updates</p>
-                    </div>
                 </div>
             </header>
 
