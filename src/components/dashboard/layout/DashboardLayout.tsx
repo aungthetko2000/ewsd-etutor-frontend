@@ -7,6 +7,8 @@ type DashboardLayoutProps = {
     activeTab: string;
     onTabChange: (key: string) => void;
     children: React.ReactNode;
+    name: string;
+    onBlogClick?: () => void;
 };
 
 const DashboardLayout = ({
@@ -14,38 +16,41 @@ const DashboardLayout = ({
     activeTab,
     onTabChange,
     children,
+    name,
+    onBlogClick
 }: DashboardLayoutProps) => {
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     return (
         <div className="relative flex h-screen w-full bg-[#F8FAFC] overflow-hidden">
-            {/* Sidebar with mobile classes */}
+            {/* Sidebar */}
             <SideBar
                 menu={menu}
                 activeTab={activeTab}
                 onTabChange={(key) => {
                     onTabChange(key);
-                    setIsSidebarOpen(false); // Close sidebar after clicking a link on mobile
+                    setIsSidebarOpen(false);
                 }}
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
             />
 
-            {/* Overlay for mobile to click-to-close */}
+            {/* Mobile Overlay */}
             {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-slate-900/50 z-20 lg:hidden"
+                    className="fixed inset-0 bg-slate-900/50 z-40 lg:hidden"
                     onClick={() => setIsSidebarOpen(false)}
                 />
             )}
 
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-                {/* Pass the toggle function to Header */}
-                <Header onMenuClick={() => setIsSidebarOpen(true)} />
+                <Header onMenuClick={() => setIsSidebarOpen(true)} name={name} onBlogClick={onBlogClick} />
 
                 <main className="flex-1 p-4 md:p-10 overflow-y-auto">
-                    {children}
+                    <div className="max-w-[1600px] mx-auto">
+                        {children}
+                    </div>
                 </main>
             </div>
         </div>
