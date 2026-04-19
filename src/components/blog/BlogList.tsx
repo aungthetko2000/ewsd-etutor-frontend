@@ -7,16 +7,7 @@ import { useNavigate } from "react-router-dom";
 const BlogList = observer(() => {
   const { blogStore } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState("latest");
-
-  const categories = [
-    "All",
-    "Education",
-    "Tutor Tips",
-    "Student Life",
-    "Career",
-  ];
 
   const navigate = useNavigate();
 
@@ -28,7 +19,6 @@ const BlogList = observer(() => {
     navigate(`/blogs/${id}`);
   };
 
-  // Icons
   const SearchIcon = () => (
     <svg
       className="w-5 h-5"

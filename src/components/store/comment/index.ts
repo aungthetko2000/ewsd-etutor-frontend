@@ -8,5 +8,7 @@ export const commentStore = {
     state,
     getAllComments: action.getAllComments,
     postComments: action.postComments,
-    getAllFeedBacks: action.getAllFeedBacks
+    getAllFeedBacks: action.getAllFeedBacks,
+    updateComment: action.updateComment,
+    deleteComment: action.deleteComment
 }

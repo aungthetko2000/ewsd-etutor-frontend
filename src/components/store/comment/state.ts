@@ -5,6 +5,7 @@ interface Comment {
     description: string;
     timeStamp: string;
     whoComment: string;
+    userId: number;
 }
 
 interface FeedBack {

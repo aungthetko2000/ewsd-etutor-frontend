@@ -1,3 +1,4 @@
+import type { EditCommentRequestDto } from "../../components/store/comment/action";
 import api from "../api";
 
 export interface CommentRequest {
@@ -19,5 +20,13 @@ export const commentApi = {
 
     postComments: async (payload: CommentRequest) => {
         return api.post('/comments', payload);
+    },
+
+    updateComment: async (payload: EditCommentRequestDto) => {
+        return api.put('/comments', payload);
+    },
+
+    deleteComment: async (id: number) => {
+        return api.delete(`/comments/${id}`)
     }
 }

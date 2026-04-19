@@ -53,7 +53,7 @@ const IconReportAnalytics = ({ className }: any) => (
 
 
 const StaffDashboard = () => {
-    const [activeTab, setActiveTab] = useState("dashboard");
+    const [activeTab, setActiveTab] = useState("report");
 
     const menu = [
         { key: "report", label: "Exception Report", icon: IconReportAnalytics },

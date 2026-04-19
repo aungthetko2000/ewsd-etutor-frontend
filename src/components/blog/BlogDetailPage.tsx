@@ -9,6 +9,7 @@ const BlogDetailPage = observer(() => {
   const { id } = useParams();
   const { blogStore } = useStore();
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   const { commentStore } = useStore();
 
@@ -21,8 +22,10 @@ const BlogDetailPage = observer(() => {
   }, [id, blogStore]);
 
   useEffect(() => {
-    commentStore.getAllComments(Number(id));
-  })
+    if (id) {
+      commentStore.getAllComments(Number(id));
+    }
+  }, [id])
 
   const blog = blogStore.state.blogDetail;
 
@@ -36,18 +39,48 @@ const BlogDetailPage = observer(() => {
     blogStore.increaseFavoriteBlog(id);
   }
 
-  const handlePostComments = () => {
+  const handleSubmitComment = async () => {
     const userInfo = sessionStorage.getItem("user");
     if (!userInfo) return;
 
     const user = JSON.parse(userInfo);
-    const payload = {
-      description: commentStore.state.description,
-      authorId: user.id,
-      blogId: Number(id),
-      submissionId: null
-    };
-    commentStore.postComments(payload);
+
+    if (editingId) {
+      const payload = {
+        commentId: editingId,
+        description: commentStore.state.description
+      };
+
+      await commentStore.updateComment(payload);
+      setEditingId(null);
+
+    } else {
+      const payload = {
+        description: commentStore.state.description,
+        authorId: user.id,
+        blogId: Number(id),
+        submissionId: null
+      };
+      await commentStore.postComments(payload);
+    }
+
+    commentStore.state.setField("description", "");
+
+    await commentStore.getAllComments(Number(id));
+  };
+
+  const handleEdit = (comment: any) => {
+    setEditingId(comment.id);
+
+    commentStore.state.setField(
+      "description",
+      comment.description
+    );
+  };
+
+  const handleDelete = async (id: number) => {
+    commentStore.deleteComment(id);
+    await commentStore.getAllComments(Number(id));
   }
 
   return (
@@ -255,39 +288,84 @@ const BlogDetailPage = observer(() => {
               />
               <div className="flex justify-center mt-6">
                 <button
-                  onClick={() => handlePostComments()}
+                  onClick={handleSubmitComment}
                   className="bg-gradient-to-r from-orange-400 to-rose-500 text-white px-10 py-3 rounded-2xl font-bold text-xs uppercase tracking-widest shadow-lg hover:brightness-110 transition-all">
-                  Post Comment
+                  {editingId ? "Update Comment" : "Post Comment"}
                 </button>
+                {editingId && (
+                  <button
+                    onClick={() => {
+                      setEditingId(null);
+                      commentStore.state.setField("description", "");
+                    }}
+                  >
+                    Cancel
+                  </button>
+                )}
               </div>
             </div>
 
             <div className="space-y-10 max-w-xl mx-auto mb-5">
-              {commentStore.state.comments.map((comment) => (
-                <div key={comment.id} className="flex gap-4 items-start">
-                  {/* Avatar remains the same */}
-                  <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center font-bold text-rose-500 text-xs shadow-sm border border-orange-100/50 flex-shrink-0">
-                    {comment.whoComment.charAt(0)}
-                  </div>
+              {commentStore.state.comments.map((comment) => {
+                const userInfo = sessionStorage.getItem("user");
+                const loginUser = userInfo ? JSON.parse(userInfo) : null;
+                const isOwner = loginUser?.id === comment.userId;
 
-                  <div className="flex-1 border-b border-orange-100/30 pb-4">
-                    {/* Header Row: Name on left, Date on right */}
-                    <div className="flex justify-between items-baseline mb-1">
-                      <p className="font-bold text-slate-900  text-sm">
-                        {comment.whoComment}
-                      </p>
-                      <p className="text-slate-400 text-[10px] uppercase tracking-wide font-sans not-italic">
-                        {formatDate(comment.timeStamp)}
-                      </p>
+                return (
+                  <div key={comment.id} className="flex gap-4 items-start">
+
+                    {/* Avatar */}
+                    <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center font-bold text-rose-500 text-xs shadow-sm border border-orange-100/50 flex-shrink-0">
+                      {comment.whoComment.charAt(0)}
                     </div>
 
-                    {/* Comment Body: Keeping your serif italic style */}
-                    <p className="text-slate-600 text-sm leading-relaxed font-serif italic">
-                      {comment.description}
-                    </p>
+                    <div className="flex-1 border-b border-orange-100/30 pb-4">
+
+                      {/* Header */}
+                      <div className="flex justify-between items-center mb-1">
+
+                        <div>
+                          <p className="font-bold text-slate-900 text-sm">
+                            {comment.whoComment}
+                          </p>
+
+                          <p className="text-slate-400 text-[10px] uppercase tracking-wide">
+                            {formatDate(comment.timeStamp)}
+                          </p>
+                        </div>
+
+                        {/* Owner Actions */}
+                        {isOwner && (
+                          <div className="flex gap-3 items-center">
+
+
+                            <button
+                              onClick={() => handleEdit(comment)}
+                              className="text-xs text-blue-500 hover:text-blue-700"
+                            >
+                              Edit
+                            </button>
+
+                            <button
+                              onClick={() => handleDelete(Number(comment.id))}
+                              className="text-xs text-red-500 hover:text-red-700"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
+
+                      </div>
+
+                      {/* Body */}
+                      <p className="text-slate-600 text-sm leading-relaxed font-serif italic">
+                        {comment.description}
+                      </p>
+
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

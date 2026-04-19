@@ -49,7 +49,7 @@ const IconStudent = ({ className }: any) => (
 
 const TutorDashBoard = () => {
 
-    const [activeTab, setActiveTab] = useState("dashboard");
+    const [activeTab, setActiveTab] = useState("schedule");
     const [showNewBlog, setShowNewBlog] = useState(false);
 
     const menu = [

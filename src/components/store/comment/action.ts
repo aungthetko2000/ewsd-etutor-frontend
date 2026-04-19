@@ -2,6 +2,11 @@ import { makeAutoObservable } from "mobx";
 import type { CommentState } from "./state";
 import { commentApi, type CommentRequest } from "../../../service/comment/commentApi";
 
+export interface EditCommentRequestDto {
+  commentId: number;
+  description: string;
+}
+
 export class CommentAction {
 
     private state: CommentState;
@@ -22,6 +27,27 @@ export class CommentAction {
 
         }
     };
+
+    deleteComment = async (id: number) => {
+        try {
+            await commentApi.deleteComment(id);
+        } catch (err) {
+            console.error(err);
+            throw err;
+        } finally {
+
+        }
+    };
+
+    updateComment = async (payload: EditCommentRequestDto) => {
+        try {
+            await commentApi.updateComment(payload);
+        } catch (err) {
+            console.log(err)
+        } finally {
+            
+        }
+    }
 
     getAllFeedBacks = async (id: number | null) => {
         try {
