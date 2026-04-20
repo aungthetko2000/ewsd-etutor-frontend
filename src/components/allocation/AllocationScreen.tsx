@@ -43,7 +43,7 @@ const AllocationScreen = observer(() => {
     useEffect(() => {
         setCurrentPage(1);
     }, [studentStore.state.searchText]);
-    
+
     useEffect(() => {
         setTutorCurrentPage(1);
     }, [tutorSearchText]);
@@ -508,24 +508,24 @@ const AllocationScreen = observer(() => {
                     </div>
                 </div>
             </div>
-            <div className="mt-10 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+            {/* Added overflow-x-auto to the wrapper for horizontal scrolling on mobile */}
+            <div className="mt-10 overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
                 <table className="min-w-full divide-y divide-gray-200">
-
                     <thead className="bg-gray-50/50">
                         <tr>
-                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 whitespace-nowrap">
                                 Student Details
                             </th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 whitespace-nowrap">
                                 Student Email
                             </th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 whitespace-nowrap">
                                 Tutor Details
                             </th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 whitespace-nowrap">
                                 Tutor Email
                             </th>
-                            <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 whitespace-nowrap">
                                 Relocate
                             </th>
                         </tr>
@@ -545,7 +545,7 @@ const AllocationScreen = observer(() => {
                                     className="transition-colors duration-200 hover:bg-blue-50/30"
                                 >
                                     {/* Student */}
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex flex-col">
                                             <span className="text-sm font-medium text-gray-900">
                                                 {allocate.studentName}
@@ -557,12 +557,12 @@ const AllocationScreen = observer(() => {
                                     </td>
 
                                     {/* Student Email */}
-                                    <td className="px-6 py-4 text-sm text-gray-600">
+                                    <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
                                         {allocate.studentEmail}
                                     </td>
 
                                     {/* Tutor */}
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex flex-col">
                                             <span className="text-sm font-medium text-gray-900">
                                                 {allocate.tutorName}
@@ -574,18 +574,18 @@ const AllocationScreen = observer(() => {
                                     </td>
 
                                     {/* Tutor Email */}
-                                    <td className="px-6 py-4 text-sm text-gray-600">
+                                    <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
                                         {allocate.tutorEmail}
                                     </td>
 
                                     {/* Relocate Button */}
-                                    <td className="px-6 py-4 text-right">
+                                    <td className="px-6 py-4 text-right whitespace-nowrap">
                                         <button
                                             onClick={() => openRelocateDrawer(allocate)}
                                             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium
-                                    text-amber-700 bg-amber-50 border border-amber-200
-                                    hover:bg-amber-100 hover:text-amber-800 hover:shadow-sm
-                                    transition-all duration-200 active:scale-95"
+                                text-amber-700 bg-amber-50 border border-amber-200
+                                hover:bg-amber-100 hover:text-amber-800 hover:shadow-sm
+                                transition-all duration-200 active:scale-95"
                                         >
                                             Relocate
                                         </button>

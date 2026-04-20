@@ -264,7 +264,7 @@ const lineData = {
                     y: {
                       beginAtZero: true,
                       ticks: {
-                        precision: 0, //  removes decimals
+                        precision: 0,
                         
                       },
                     },

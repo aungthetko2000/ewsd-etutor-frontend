@@ -3,7 +3,7 @@ import { authService } from "./authService";
 import { notifyAuthUpdated } from "./authEvent";
 
 const api = axios.create({
-    baseURL: 'http://www.owlstudy.academy:8080/api/v1',
+    baseURL: 'http://localhost:8080/api/v1',
     headers: {
         'Content-Type': 'application/json',
     },

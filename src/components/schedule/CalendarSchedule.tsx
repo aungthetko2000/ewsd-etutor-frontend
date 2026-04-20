@@ -5,6 +5,7 @@ import AddEventModal from "./AddEventModal";
 import SessionDetailModal from "./SessionDetailsModal";
 import { useStore } from "../store/useStore";
 import type { CalendarEvent } from "../../service/meeting/calendar";
+import MessengerWidget from "../message/MessageWidget";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -177,7 +178,10 @@ const CalendarSchedule = observer(() => {
         isPast={detailState?.isPast ?? false}
         onClose={() => setDetailState(null)}
       />
+
+      <MessengerWidget />
     </>
+    
   );
 })
 

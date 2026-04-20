@@ -61,7 +61,9 @@ const ExceptionReport = observer(() => {
                 data: reportStore.state.averageTutorMessage.map(
                     item => item.averageMessagesPerContact
                 ),
-                borderWidth: 1
+                borderWidth: 1,
+                backgroundColor: 'rgba(139, 69, 19, 0.6)',
+                borderColor: 'rgba(139, 69, 19, 1)',
             }
         ]
     };
@@ -169,7 +171,7 @@ const ExceptionReport = observer(() => {
                             onClick={handleGenerate}
                             disabled={!reportStore.state.reportType || (reportStore.state.reportType === "INACTIVE" && !reportStore.state.inactiveRange)}
                             className="w-full h-[52px] rounded-2xl font-black text-sm uppercase tracking-wider transition-all duration-300 
-                            enabled:bg-slate-900 enabled:text-white enabled:hover:bg-orange-600 enabled:hover:shadow-orange-200 enabled:shadow-lg
+                            enabled:bg-gradient-to-br from-orange-500 to-rose-500 enabled:text-white enabled:cursor-pointer
                             disabled:bg-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed group"
                         >
                             <span className="flex items-center justify-center gap-2">
@@ -295,10 +297,6 @@ const ExceptionReport = observer(() => {
                                     Student Status Report
                                 </h4>
                             </div>
-
-                            <button className="bg-white/10 hover:bg-orange-500 text-white text-[10px] font-black px-4 py-2 rounded-lg transition-all border border-white/10 tracking-widest uppercase">
-                                Export CSV
-                            </button>
                         </div>
 
                         <div className="p-2">
