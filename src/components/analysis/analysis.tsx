@@ -107,15 +107,6 @@ const Analysis = () => {
     ],
   };
 
-  const pageNames: Record<string, string> = {
-  "/api/v1/login": "Login Page",
-  "/api/v1/admin/analytics/report": "Analytics Dashboard",
-  "/api/v1/admin": "Admin Management",
-  "/api/v1/students": "Student Management",
-  "/api/v1/tutors": "Tutor Directory",
-  "/api/v1/staffs": "Staff Management",
-};
-
 const getPageName = (uri: string) => {
   if (!uri) return "Unknown";
 

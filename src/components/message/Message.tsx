@@ -87,7 +87,7 @@ const Message = observer(() => {
 
     messageStore.getChatContacts(user.id);
 
-    const socket = new SockJS("http://localhost:8080/ws-stomp");
+    const socket = new SockJS("http://54.255.141.29:8080/ws-stomp");
 
     const client = new Client({
       webSocketFactory: () => socket,

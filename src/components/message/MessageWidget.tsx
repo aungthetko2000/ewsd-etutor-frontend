@@ -56,8 +56,7 @@ const Icon = {
 
 const MessengeWidget = observer(() => {
     const [panelOpen, setPanelOpen] = useState(false);
-    const [messengerOpen, setMessengerOpen] = useState(false);
-    const hasUnread = true;
+    const [messengerOpen] = useState(false);
 
     const { messageStore } = useStore();
     const navigate = useNavigate();

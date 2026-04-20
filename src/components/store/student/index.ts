@@ -7,5 +7,4 @@ const action = new StudentAction(state);
 export const studentStore = {
     state,
     getAllUnassignedStudents: action.getAllUnassignedStudents,
-    getAllAssignedStudents: action.getAllAssignedStudents
 }

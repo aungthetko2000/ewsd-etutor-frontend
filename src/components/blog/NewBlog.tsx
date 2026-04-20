@@ -14,17 +14,9 @@ import {
   Strikethrough,
   List,
   ListOrdered,
-  Link as LinkIcon,
-  Quote,
   Undo,
   Redo,
-  ChevronDown,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  Minimize,
-  Maximize,
-  Trash
+  ChevronDown
 } from "lucide-react";
 
 interface NewBlogProps {
@@ -36,7 +28,6 @@ const NewBlog: React.FC<NewBlogProps> = observer(({ show, onClose }) => {
   const { blogStore } = useStore();
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const editorImageInputRef = useRef<HTMLInputElement | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
 
@@ -52,8 +43,6 @@ const NewBlog: React.FC<NewBlogProps> = observer(({ show, onClose }) => {
   const preview = image ? URL.createObjectURL(image) : null;
 
   const [showHeadingMenu, setShowHeadingMenu] = useState(false);
-  const [urlPrompt, setUrlPrompt] = useState<{ isOpen: boolean, range: Range | null }>({ isOpen: false, range: null });
-  const [urlInput, setUrlInput] = useState("");
   const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null);
 
   const handleFormat = (e: React.MouseEvent, command: string, value?: string) => {
@@ -64,76 +53,12 @@ const NewBlog: React.FC<NewBlogProps> = observer(({ show, onClose }) => {
     }
   };
 
-  const openUrlPrompt = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const selection = window.getSelection();
-    const range = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-    setUrlPrompt({ isOpen: true, range });
-    setUrlInput("");
-  };
-
-  const applyUrl = () => {
-    if (urlInput) {
-      contentRef.current?.focus();
-      const selection = window.getSelection();
-      if (urlPrompt.range) {
-        selection?.removeAllRanges();
-        selection?.addRange(urlPrompt.range);
-      }
-      document.execCommand('createLink', false, urlInput);
-      
-      if (contentRef.current) {
-        blogStore.state.setField("content", contentRef.current.innerHTML);
-      }
-    }
-    setUrlPrompt({ isOpen: false, range: null });
-  };
-
-  const handleEditorImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Create a local object URL for the image to display it immediately
-    const imageUrl = URL.createObjectURL(file);
-    
-    contentRef.current?.focus();
-    document.execCommand('insertImage', false, imageUrl);
-    
-    if (contentRef.current) {
-      blogStore.state.setField("content", contentRef.current.innerHTML);
-    }
-    
-    // Reset the input so the same file can be uploaded again if needed
-    if (editorImageInputRef.current) {
-      editorImageInputRef.current.value = '';
-    }
-  };
-
   const handleEditorClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.tagName === 'IMG') {
       setSelectedImage(target as HTMLImageElement);
     } else {
       setSelectedImage(null);
-    }
-  };
-
-  const updateImageStyle = (e: React.MouseEvent, style: Partial<CSSStyleDeclaration>) => {
-    e.preventDefault();
-    if (!selectedImage) return;
-    Object.assign(selectedImage.style, style);
-    if (contentRef.current) {
-      blogStore.state.setField("content", contentRef.current.innerHTML);
-    }
-  };
-
-  const deleteImage = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!selectedImage) return;
-    selectedImage.remove();
-    setSelectedImage(null);
-    if (contentRef.current) {
-      blogStore.state.setField("content", contentRef.current.innerHTML);
     }
   };
 

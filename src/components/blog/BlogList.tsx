@@ -119,7 +119,7 @@ const BlogList = observer(() => {
                 <div className="relative h-64 bg-slate-50 overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-orange-400/20 to-rose-500/20 group-hover:scale-110 transition-transform duration-700">
                     <img
-                      src={`http://localhost:8080/images/${blog.imageUrl}`}
+                      src={`http://54.255.141.29:8080/images/${blog.imageUrl}`}
                       alt={blog.title || "Blog Post"}
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
                     />
