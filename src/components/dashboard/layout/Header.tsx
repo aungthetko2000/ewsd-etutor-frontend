@@ -50,7 +50,7 @@ const Header = observer(
             }
             notificationStore.getAllNotification();
 
-            const socket = new SockJS("http://54.255.141.29:8080/ws-stomp");
+            const socket = new SockJS("http://localhost:8080/ws-stomp");
             const stompClient = new Client({
                 webSocketFactory: () => socket,
                 debug: (str) => console.log("STOMP: " + str),
@@ -239,162 +239,165 @@ const Header = observer(
                         </PermissionGate>
 
                         {/* --- Notifications Section --- */}
-                        <div
-                            className="relative"
-                        >
-                            <button
-                                onClick={() => setShowNotif(!showNotif)}
-                                className="group cursor-pointer relative p-2.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-all duration-200 active:scale-95"
+                        <PermissionGate permissions={["VIEW_NOTIFICATION"]}>
+                            <div
+                                className="relative"
                             >
-                                {notificationStore.state.notifications.length > 0 && (
-                                    <div className="absolute top-1.5 right-1.5 z-10">
-                                        <span className="relative flex h-5 w-5">
-                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                                            <span className="relative inline-flex items-center justify-center rounded-full h-5 w-5 bg-orange-600 text-[10px] font-bold text-white ring-2 ring-white shadow-sm">
-                                                {notificationStore.state.notifications.length > 9
-                                                    ? "9+"
-                                                    : notificationStore.state.notifications.length}
-                                            </span>
-                                        </span>
-                                    </div>
-                                )}
-
-                                <svg
-                                    className="w-6 h-6 transition-transform group-hover:rotate-[15deg]"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
+                                <button
+                                    onClick={() => setShowNotif(!showNotif)}
+                                    className="group cursor-pointer relative p-2.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-all duration-200 active:scale-95"
                                 >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                                    />
-                                </svg>
-                            </button>
-
-                            {showNotif && (
-                                <>
-                                    <div className="absolute h-4 w-full top-full"></div>
-                                    <div className="absolute right-0 mt-3 w-80 bg-white shadow-2xl rounded-xl border border-slate-100 z-50 overflow-hidden animate-in fade-in zoom-in duration-200">
-                                        <div className="p-4 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
-                                            <h3 className="font-semibold text-slate-800">
-                                                Notification
-                                            </h3>
-                                            <span className="text-[10px] bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-bold">
-                                                {notificationStore.state.notifications.length} New
+                                    {notificationStore.state.notifications.length > 0 && (
+                                        <div className="absolute top-1.5 right-1.5 z-10">
+                                            <span className="relative flex h-5 w-5">
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                                                <span className="relative inline-flex items-center justify-center rounded-full h-5 w-5 bg-orange-600 text-[10px] font-bold text-white ring-2 ring-white shadow-sm">
+                                                    {notificationStore.state.notifications.length > 9
+                                                        ? "9+"
+                                                        : notificationStore.state.notifications.length}
+                                                </span>
                                             </span>
                                         </div>
-                                        <div className="max-h-96 overflow-y-auto">
-                                            {notificationStore.state.notifications.length === 0 ? (
-                                                <div className="p-8 text-center">
-                                                    <p className="text-slate-400 text-sm">All caught up!</p>
-                                                </div>
-                                            ) : (
-                                                notificationStore.state.notifications.map((notif) => (
-                                                    <div
-                                                        key={notif.id}
-                                                        className="p-4 border-b border-slate-50 hover:bg-slate-50/50 transition-colors"
-                                                    >
-                                                        {/* Notification content */}
-                                                        <div className="flex flex-col gap-2 p-3 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
-                                                            <span className="text-sm font-semibold text-slate-900 leading-snug">
-                                                                {notif.detailMessage}
-                                                            </span>
+                                    )}
 
-                                                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-slate-600">
-                                                                {/* Show scheduled time only if exists (mainly for meetings) */}
-                                                                {notif.scheduledAt && (
-                                                                    <span className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md font-medium">
-                                                                        <svg
-                                                                            className="w-3.5 h-3.5"
-                                                                            fill="none"
-                                                                            stroke="currentColor"
-                                                                            strokeWidth="2"
-                                                                            viewBox="0 0 24 24"
-                                                                        >
-                                                                            <path
-                                                                                strokeLinecap="round"
-                                                                                strokeLinejoin="round"
-                                                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                                                            />
-                                                                        </svg>
-                                                                        {notif.scheduledAt} • {notif.startTime}
-                                                                    </span>
-                                                                )}
-                                                                <span className="flex items-center gap-1 text-slate-500">
-                                                                    <span className="font-medium text-slate-400">From:</span>{" "}
-                                                                    {notif.senderName}
-                                                                    <span className="text-slate-300 mx-1">|</span>
-                                                                    <span className="italic">{notif.senderEmail}</span>
-                                                                </span>
-                                                            </div>
-                                                        </div>
+                                    <svg
+                                        className="w-6 h-6 transition-transform group-hover:rotate-[15deg]"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                                        />
+                                    </svg>
+                                </button>
 
-                                                        {/* Accept/Decline buttons — only for MEETING type */}
-                                                        {notif.type === "MEETING" && (
-                                                            <>
-                                                                <div className="flex gap-2 mt-3">
-                                                                    <button
-                                                                        onClick={() => handleMeetingConfirm(notif.id)}
-                                                                        className="flex-1 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold py-2 rounded-lg transition-colors shadow-sm shadow-orange-200"
-                                                                    >
-                                                                        Accept
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => setDeclineId(notif.id)}
-                                                                        className="flex-1 border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold py-2 rounded-lg transition-colors"
-                                                                    >
-                                                                        Decline
-                                                                    </button>
-                                                                </div>
-
-                                                                {declineId === notif.id && (
-                                                                    <div
-                                                                        className={`mt-3 p-2 rounded-lg animate-in slide-in-from-top-2 ${errors[notif.id]
-                                                                            ? "border-rose-500 bg-rose-50 ring-2 ring-rose-100"
-                                                                            : "border-gray-200 bg-gray-50"
-                                                                            }`}
-                                                                    >
-                                                                        <textarea
-                                                                            className={`w-full text-xs p-2 border rounded-md focus:ring-1 focus:ring-orange-500 outline-none resize-none ${errors[notif.id] ? "placeholder-rose-300" : "placeholder-gray-300"
-                                                                                }`}
-                                                                            placeholder={errors[notif.id] ? "Reason is required" : "Provide a reason"}
-                                                                            rows={2}
-                                                                            value={reasons[notif.id] || ""}
-                                                                            onChange={(e) => {
-                                                                                setErrors((prev) => ({ ...prev, [notif.id]: false }));
-                                                                                setReasons((prev) => ({ ...prev, [notif.id]: e.target.value }));
-                                                                            }}
-                                                                        />
-                                                                        <div className="flex justify-end gap-2 mt-1">
-                                                                            <button
-                                                                                onClick={() => setDeclineId(null)}
-                                                                                className="text-[10px] text-slate-400 font-bold"
-                                                                            >
-                                                                                Cancel
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={() => handleMeetingDecline(notif.id)}
-                                                                                className="text-[10px] text-rose-500 font-bold"
-                                                                            >
-                                                                                Confirm
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                )}
-                                                            </>
-                                                        )}
+                                {showNotif && (
+                                    <>
+                                        <div className="absolute h-4 w-full top-full"></div>
+                                        <div className="absolute right-0 mt-3 w-80 bg-white shadow-2xl rounded-xl border border-slate-100 z-50 overflow-hidden animate-in fade-in zoom-in duration-200">
+                                            <div className="p-4 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
+                                                <h3 className="font-semibold text-slate-800">
+                                                    Notification
+                                                </h3>
+                                                <span className="text-[10px] bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-bold">
+                                                    {notificationStore.state.notifications.length} New
+                                                </span>
+                                            </div>
+                                            <div className="max-h-96 overflow-y-auto">
+                                                {notificationStore.state.notifications.length === 0 ? (
+                                                    <div className="p-8 text-center">
+                                                        <p className="text-slate-400 text-sm">All caught up!</p>
                                                     </div>
-                                                ))
-                                            )}
-                                        </div>
+                                                ) : (
+                                                    notificationStore.state.notifications.map((notif) => (
+                                                        <div
+                                                            key={notif.id}
+                                                            className="p-4 border-b border-slate-50 hover:bg-slate-50/50 transition-colors"
+                                                        >
+                                                            {/* Notification content */}
+                                                            <div className="flex flex-col gap-2 p-3 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+                                                                <span className="text-sm font-semibold text-slate-900 leading-snug">
+                                                                    {notif.detailMessage}
+                                                                </span>
 
-                                    </div>
-                                </>
-                            )}
-                        </div>
+                                                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-slate-600">
+                                                                    {/* Show scheduled time only if exists (mainly for meetings) */}
+                                                                    {notif.scheduledAt && (
+                                                                        <span className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md font-medium">
+                                                                            <svg
+                                                                                className="w-3.5 h-3.5"
+                                                                                fill="none"
+                                                                                stroke="currentColor"
+                                                                                strokeWidth="2"
+                                                                                viewBox="0 0 24 24"
+                                                                            >
+                                                                                <path
+                                                                                    strokeLinecap="round"
+                                                                                    strokeLinejoin="round"
+                                                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                                                />
+                                                                            </svg>
+                                                                            {notif.scheduledAt} • {notif.startTime}
+                                                                        </span>
+                                                                    )}
+                                                                    <span className="flex items-center gap-1 text-slate-500">
+                                                                        <span className="font-medium text-slate-400">From:</span>{" "}
+                                                                        {notif.senderName}
+                                                                        <span className="text-slate-300 mx-1">|</span>
+                                                                        <span className="italic">{notif.senderEmail}</span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Accept/Decline buttons — only for MEETING type */}
+                                                            {notif.type === "MEETING" && (
+                                                                <>
+                                                                    <div className="flex gap-2 mt-3">
+                                                                        <button
+                                                                            onClick={() => handleMeetingConfirm(notif.id)}
+                                                                            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold py-2 rounded-lg transition-colors shadow-sm shadow-orange-200"
+                                                                        >
+                                                                            Accept
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => setDeclineId(notif.id)}
+                                                                            className="flex-1 border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold py-2 rounded-lg transition-colors"
+                                                                        >
+                                                                            Decline
+                                                                        </button>
+                                                                    </div>
+
+                                                                    {declineId === notif.id && (
+                                                                        <div
+                                                                            className={`mt-3 p-2 rounded-lg animate-in slide-in-from-top-2 ${errors[notif.id]
+                                                                                ? "border-rose-500 bg-rose-50 ring-2 ring-rose-100"
+                                                                                : "border-gray-200 bg-gray-50"
+                                                                                }`}
+                                                                        >
+                                                                            <textarea
+                                                                                className={`w-full text-xs p-2 border rounded-md focus:ring-1 focus:ring-orange-500 outline-none resize-none ${errors[notif.id] ? "placeholder-rose-300" : "placeholder-gray-300"
+                                                                                    }`}
+                                                                                placeholder={errors[notif.id] ? "Reason is required" : "Provide a reason"}
+                                                                                rows={2}
+                                                                                value={reasons[notif.id] || ""}
+                                                                                onChange={(e) => {
+                                                                                    setErrors((prev) => ({ ...prev, [notif.id]: false }));
+                                                                                    setReasons((prev) => ({ ...prev, [notif.id]: e.target.value }));
+                                                                                }}
+                                                                            />
+                                                                            <div className="flex justify-end gap-2 mt-1">
+                                                                                <button
+                                                                                    onClick={() => setDeclineId(null)}
+                                                                                    className="text-[10px] text-slate-400 font-bold"
+                                                                                >
+                                                                                    Cancel
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={() => handleMeetingDecline(notif.id)}
+                                                                                    className="text-[10px] text-rose-500 font-bold"
+                                                                                >
+                                                                                    Confirm
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    ))
+                                                )}
+                                            </div>
+
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </PermissionGate>
+
 
                         {/* --- User Profile --- */}
                         <div className="group flex items-center gap-3 pl-4 border-l border-slate-200 cursor-pointer">
