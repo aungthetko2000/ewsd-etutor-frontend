@@ -50,7 +50,7 @@ const Header = observer(
             }
             notificationStore.getAllNotification();
 
-            const socket = new SockJS("http://localhost:8080/ws-stomp");
+            const socket = new SockJS("http://54.255.141.29:8080/ws-stomp");
             const stompClient = new Client({
                 webSocketFactory: () => socket,
                 debug: (str) => console.log("STOMP: " + str),
