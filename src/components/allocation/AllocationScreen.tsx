@@ -74,15 +74,17 @@ const AllocationScreen = observer(() => {
         setIsDrawerOpen(false);
     };
 
-    const handleBulkAllocate = () => {
+    const handleBulkAllocate = async () => {
         const tutorId = tutorStore.state.selectedTutor?.id;
         const studentsId = studentStore.state.selectedStudent;
 
         if (!tutorId || studentsId.length === 0) return;
 
-        staffStore.bulkAllocateStudents(studentsId, tutorId);
+        await staffStore.bulkAllocateStudents(studentsId, tutorId);
 
         studentStore.state.removeStudentsByIds(studentsId);
+
+        await staffStore.getAllAllocation();
     };
 
     const [selectedTutorId, setSelectedTutorId] = useState<number | null>(null);

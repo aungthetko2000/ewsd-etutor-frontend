@@ -45,6 +45,21 @@ export class BlogAction {
         }
     }
 
+    async searchBlogs(keyword: string) {
+        try {
+            const res = await blogApi.searchBlog(keyword);
+            runInAction(() => {
+                this.state.blogs = res.data.data;
+            });
+        } catch (error) {
+            console.error(error);
+        } finally {
+            runInAction(() => {
+                this.state.loading = false;
+            });
+        }
+    }
+
     getBlogById = async (id: number) => {
         try {
             this.state.loading = true
