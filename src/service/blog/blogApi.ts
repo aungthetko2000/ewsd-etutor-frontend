@@ -7,7 +7,7 @@ export interface CreateBlogPayload {
 }
 
 export const blogApi = {
-    
+
     createNewBlog: async (formData: FormData) => {
         return api.post("/blogs", formData, {
             headers: {
@@ -30,5 +30,9 @@ export const blogApi = {
 
     getMostFavoriteBlog: async () => {
         return api.get("/blogs/paginate");
+    },
+
+    searchBlog: async (keyword: string) => {
+        return api.get(`/blogs/search?keyword=${keyword}`);
     }
 }

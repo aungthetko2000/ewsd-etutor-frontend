@@ -10,5 +10,6 @@ export const blogStore = {
     getAllBlog: action.getAllBlogs,
     getBlogDetailById: action.getBlogById,
     increaseFavoriteBlog: action.increaseFavoriteBlog,
-    getMostFavoriteBlog: action.getMostFavoriteBlog
+    getMostFavoriteBlog: action.getMostFavoriteBlog,
+    searchBlogs: action.searchBlogs
 }

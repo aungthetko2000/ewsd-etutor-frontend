@@ -12,12 +12,31 @@ const BlogList = observer(() => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    blogStore.getAllBlog();
-  }, [blogStore]);
+    const timeout = setTimeout(() => {
+      if (searchQuery.trim() === "") {
+        blogStore.getAllBlog();
+      } else {
+        blogStore.searchBlogs(searchQuery);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [searchQuery]);
 
   const handleBlogDetails = (id: number) => {
     navigate(`/blogs/${id}`);
   };
+
+  const sortedBlogs = [...blogStore.state.blogs].sort((a, b) => {
+    if (sortBy === "popular") {
+      return (b.favoriteCount || 0) - (a.favoriteCount || 0);
+    }
+
+    return (
+      new Date(b.createdAt).getTime() -
+      new Date(a.createdAt).getTime()
+    );
+  });
 
   const SearchIcon = () => (
     <svg
@@ -110,7 +129,7 @@ const BlogList = observer(() => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            {blogStore.state.blogs.map((blog) => (
+            {sortedBlogs.map((blog) => (
               <article
                 key={blog.id}
                 className="group flex flex-col bg-white rounded-3xl border border-slate-100 hover:border-orange-200 hover:shadow-[0_20px_40px_rgba(255,107,0,0.1)] transition-all duration-500 overflow-hidden"
@@ -119,7 +138,7 @@ const BlogList = observer(() => {
                 <div className="relative h-64 bg-slate-50 overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-orange-400/20 to-rose-500/20 group-hover:scale-110 transition-transform duration-700">
                     <img
-                      src={`http://54.255.141.29:8080/images/${blog.imageUrl}`}
+                      src={`http://localhost:8080/images/${blog.imageUrl}`}
                       alt={blog.title || "Blog Post"}
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
                     />
@@ -142,8 +161,8 @@ const BlogList = observer(() => {
                     {blog.title}
                   </h3>
 
-                  <p className="text-slate-500 text-sm leading-relaxed mb-8 line-clamp-3" 
-                    dangerouslySetInnerHTML={{ __html: blog.content }} 
+                  <p className="text-slate-500 text-sm leading-relaxed mb-8 line-clamp-3"
+                    dangerouslySetInnerHTML={{ __html: blog.content }}
                   />
 
                   <div className="mt-auto flex items-center justify-between">

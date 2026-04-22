@@ -152,7 +152,7 @@ const BlogDetailPage = observer(() => {
       <div className="max-w-4xl mx-auto px-4 md:px-6 mb-16 md:mb-10">
         <div className="aspect-video relative bg-[#F7F3ED] rounded-2xl md:rounded-3xl border border-slate-200/50 overflow-hidden shadow-[inset_0_2px_10px_rgba(0,0,0,0.02)] group">
           <img
-            src={`http://54.255.141.29:8080/images/${blog.imageUrl}`}
+            src={`http://localhost:8080/images/${blog.imageUrl}`}
             alt={blog.title || "Blog Post"}
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
           />

@@ -220,7 +220,7 @@ const IndividualAssignments = observer(() => {
                                 <div className="flex-1 bg-slate-100 relative">
                                     {activeFile ? (
                                         <iframe
-                                            src={`http://54.255.141.29:8080/docs/${activeFile.fileName}`}
+                                            src={`http://localhost:8080/docs/${activeFile.fileName}`}
                                             className="w-full h-full border-none"
                                             title="Document Preview"
                                         />
